@@ -3,7 +3,6 @@ package bayesian;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,6 +11,14 @@ import static java.util.Arrays.asList;
 public class Main {
     private static File file = new File("data.csv");
     private static Object[][] data = new Object[15][5];
+    private static List<String[]> dataList = new ArrayList<>();
+    private static final int FEATURE_OUTLOOK = 0;
+    private static final int FEATURE_TEMP = 1;
+    private static final int FEATURE_HUMIDITTY = 2;
+    private static final int FEATURE_WINDY = 3;
+    private static final int FEATURE_PLAYINDOOR = 4;
+    private static final int FEATURE_DAY = 5;
+
 
     private Main() {
     }
@@ -33,8 +40,8 @@ public class Main {
 
         // use extractFeatureFromDataset to extract the feature we want from the dataset.
 
-        List<Object> yes = extractFeatureFromDataset(data, 0, "Yes");
-        List<Object> no = extractFeatureFromDataset(data, 0, "No");
+        List<Object> yes = extractFeatureFromDataset(data, FEATURE_OUTLOOK, "Yes");
+        List<Object> no =  extractFeatureFromDataset(data, FEATURE_OUTLOOK, "No");
 
         // Convert the 2D array from above to a list so we can use streams.
         List<String> terms = twoDArrayToList(data);
@@ -88,14 +95,41 @@ public class Main {
                         String::toLowerCase, w -> 1, Integer::sum));
     }
 
-    private static List extractFeatureFromDataset(Object[][] array, int index, String something) {
+    private static List extractFeatureFromDataset(Object[][] array, int columnIndex, String something) {
         List<Object> column = new ArrayList<>();
-        for (int i = 1; i < array.length; i++) {
-            if (array[i][4].equals(something)) {
-                column.add(array[i][index]);
+        Map<Object, List<Object>> properties = new LinkedHashMap<>();
+            for(int j = 0 ; j < array[0].length; j++) {
+                properties.put(array[0][j], null );
+            }
+        Object[] features = new Object[properties.size()];
+        int p = 0;
+        for (Map.Entry<Object, List<Object>> entry : properties.entrySet()) {
+            Object key = entry.getKey();
+            features[p] = key;
+            p++;
+
+            // now work with key and value...
+        }
+
+        for (int i = 0; i < properties.size(); i++) {
+            Object waarde = array[i][columnIndex];
+            if (!properties.containsValue(waarde)) {
+                List<Object> currentValues = properties.get(features[i]);
+                //properties.put(features[i], currentValues.add(waarde));
+                int a = 5;
             }
 
         }
+
+
+
+
+//            if (array[i][4].equals(something)) {
+//                column.add(array[i][columnIndex]);
+//            }
+
+
+
         return column;
     }
 
@@ -115,6 +149,7 @@ public class Main {
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
             data[index++] = line.split(delimiter);
+            dataList.add(line.split(delimiter));
         }
         sc.close();
     }

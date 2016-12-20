@@ -1,15 +1,15 @@
-Outlook;Temp;Humidity;Windy;Play Golf
-Rainy;Hot;High;False;No
-Rainy;Hot;High;True;No
-Overcast;Hot;High;False;Yes
-Sunny;Mild;High;False;Yes
-Sunny;Cool;Normal;False;Yes
-Sunny;Cool;Normal;True;No
-Overcast;Cool;Normal;True;Yes
-Rainy;Mild;High;False;No
-Rainy;Cool;Normal;False;Yes
-Sunny;Mild;Normal;False;Yes
-Rainy;Mild;Normal;True;Yes
-Overcast;Mild;High;True;Yes
-Overcast;Hot;Normal;False;Yes
-Sunny;Mild;High;True;No
+Outlook;Temp;Humidity;Windy;Play Indoor;Day
+Rainy;Hot;High;False;No;1
+Rainy;Hot;High;True;No;2
+Overcast;Hot;High;False;Yes;3
+Sunny;Mild;High;False;Yes;4
+Sunny;Cool;Normal;False;Yes;5
+Sunny;Cool;Normal;True;No;6
+Overcast;Cool;Normal;True;Yes;7
+Rainy;Mild;High;False;No;1
+Rainy;Cool;Normal;False;Yes;2
+Sunny;Mild;Normal;False;Yes;3
+Rainy;Mild;Normal;True;Yes;4
+Overcast;Mild;High;True;Yes;5
+Overcast;Hot;Normal;False;Yes;6
+Sunny;Mild;High;True;No;7

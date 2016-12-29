@@ -40,13 +40,14 @@ public class Main {
 
         // use extractFeatureFromDataset to extract the feature we want from the dataset.
 
-        List<Object> yes = extractFeatureFromDataset(data, FEATURE_OUTLOOK, "Yes");
-        List<Object> no =  extractFeatureFromDataset(data, FEATURE_OUTLOOK, "No");
+        List<Object> yes = extractFeatureFromDataset(data, FEATURE_PLAYINDOOR, "Yes");
+        List<Object> no = extractFeatureFromDataset(data, FEATURE_OUTLOOK, "No");
 
         // Convert the 2D array from above to a list so we can use streams.
-        List<String> terms = twoDArrayToList(data);
+        List<String> features = twoDArrayToList(data);
         // Frequency "table"
-
+        Map<String, Integer> featureFrequencies;
+        featureFrequencies = calculateFrequency(features);
 
         // Likelihood "table"
 
@@ -96,41 +97,85 @@ public class Main {
     }
 
     private static List extractFeatureFromDataset(Object[][] array, int columnIndex, String something) {
-        List<Object> column = new ArrayList<>();
-        Map<Object, List<Object>> properties = new LinkedHashMap<>();
-            for(int j = 0 ; j < array[0].length; j++) {
-                properties.put(array[0][j], null );
-            }
-        Object[] features = new Object[properties.size()];
-        int p = 0;
-        for (Map.Entry<Object, List<Object>> entry : properties.entrySet()) {
-            Object key = entry.getKey();
-            features[p] = key;
-            p++;
+        List<Object> zooi = new ArrayList<>();
+        Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
 
-            // now work with key and value...
+
+
+        // Start at 1 because of heading in csv and the data structure.
+        for (int i = 1; i < array.length; i++) {
+            if (!classes.containsKey(array[i][columnIndex])) {
+                classes.put(array[i][columnIndex], null);
+            }
+        }
+        double amountOfYes = 0;
+        double amountOfNo = 0;
+
+        for (int i = 1; i < array.length; i++) {
+            if ("Yes".equals(array[i][columnIndex])) {
+                amountOfYes += 1;
+            } else if ("No".equals(array[i][columnIndex])) {
+                amountOfNo += 1;
+            }
         }
 
-        for (int i = 0; i < properties.size(); i++) {
-            Object waarde = array[i][columnIndex];
-            if (!properties.containsValue(waarde)) {
-                List<Object> currentValues = properties.get(features[i]);
-                //properties.put(features[i], currentValues.add(waarde));
-                int a = 5;
-            }
+        for (int i = 1; i < array.length; i++) {
+            Map<Integer, Map<Object, Double>> features = new HashMap<>();
+            for (int j = 0; j < array[i].length; j++) {
+                if (j == columnIndex) {
+                    continue;
+                }
+                Map<Object, Double> featureWithValues = new HashMap<>();
 
+                double percentageOfTotal = 0;
+                if ("Yes".equals(array[i][columnIndex])) {
+                    percentageOfTotal = 1 / amountOfYes;
+                } else if ("No".equals(array[i][columnIndex])) {
+                    percentageOfTotal = 1 / amountOfNo;
+                }
+
+                if (classes.containsKey(array[i][columnIndex]))  {
+                    Map<Integer, Map<Object, Double>> currentFeatures = classes.get(array[i][columnIndex]);
+                    if (currentFeatures.containsKey(j)) {
+                        Map<Object, Double> currentValues = currentFeatures.get(j);
+                        if (currentValues.containsKey(array[i][j])) {
+                            percentageOfTotal += currentValues.get(array[i][j]);
+                        }
+                    }
+                    featureWithValues.put(array[i][j], percentageOfTotal);
+                    features.put(j, featureWithValues);
+                } else {
+                    featureWithValues.put(array[i][j], percentageOfTotal);
+                    features.put(j, featureWithValues);
+                }
+            }
+            classes.put(array[i][columnIndex], features);
         }
 
 
-
-
+//        Object[] features = new Object[classes.size()];
+//        int p = 0;
+//        for (Map.Entry<Object, List<Object>> entry : classes.entrySet()) {
+//            Object key = entry.getKey();
+//            features[p] = key;
+//            p++;
+//
+//            // now work with key and value...
+//        }
+//
+//        for (int i = 0; i < classes.size(); i++) {
+//            Object waarde = array[i][columnIndex];
+//            if (!classes.containsValue(waarde)) {
+//                List<Object> currentValues = classes.get(features[i]);
+//                //classes.put(features[i], currentValues.add(waarde));
+//                int a = 5;
+//            }
+//
+//        }
 //            if (array[i][4].equals(something)) {
 //                column.add(array[i][columnIndex]);
 //            }
-
-
-
-        return column;
+        return zooi;
     }
 
     private static <T> List<T> twoDArrayToList(Object[][] twoDArray) {

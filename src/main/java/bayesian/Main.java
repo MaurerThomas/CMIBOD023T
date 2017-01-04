@@ -100,8 +100,6 @@ public class Main {
         List<Object> zooi = new ArrayList<>();
         Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
 
-
-
         // Start at 1 because of heading in csv and the data structure.
         for (int i = 1; i < array.length; i++) {
             if (!classes.containsKey(array[i][columnIndex])) {
@@ -111,6 +109,7 @@ public class Main {
         double amountOfYes = 0;
         double amountOfNo = 0;
 
+        // Calculate prior probability
         for (int i = 1; i < array.length; i++) {
             if ("Yes".equals(array[i][columnIndex])) {
                 amountOfYes += 1;
@@ -119,14 +118,18 @@ public class Main {
             }
         }
 
+        // Calculate conditional probabilities for every feature
         for (int i = 1; i < array.length; i++) {
             Map<Integer, Map<Object, Double>> features = new HashMap<>();
             for (int j = 0; j < array[i].length; j++) {
+                // Skip column 4(classes)
                 if (j == columnIndex) {
                     continue;
                 }
+
                 Map<Object, Double> featureWithValues = new HashMap<>();
 
+                // Calculates conditional probability for this feature where class is "Yes" or "No"
                 double percentageOfTotal = 0;
                 if ("Yes".equals(array[i][columnIndex])) {
                     percentageOfTotal = 1 / amountOfYes;
@@ -134,14 +137,33 @@ public class Main {
                     percentageOfTotal = 1 / amountOfNo;
                 }
 
+                //Check if class exists (Yes/No). Yes then check if feature exists. No then add the class and feature.
                 if (classes.containsKey(array[i][columnIndex]))  {
-                    Map<Integer, Map<Object, Double>> currentFeatures = classes.get(array[i][columnIndex]);
-                    if (currentFeatures.containsKey(j)) {
-                        Map<Object, Double> currentValues = currentFeatures.get(j);
-                        if (currentValues.containsKey(array[i][j])) {
-                            percentageOfTotal += currentValues.get(array[i][j]);
+                    Map<Integer, Map<Object, Double>> currentFeatures;
+
+                    if(classes.get(array[i][columnIndex]) != null) {
+                        currentFeatures = classes.get(array[i][columnIndex]);
+
+                        // Check of feature exists, if yes then get the Map of this feature.
+                        if (currentFeatures.containsKey(j)) {
+                            Map<Object, Double> currentValues = currentFeatures.get(j);
+                            //If the feature exists, update the percentage.
+                            if (currentValues.containsKey(array[i][j])) {
+                                percentageOfTotal += currentValues.get(array[i][j]);
+
+                                if(currentValues.size() >1){
+                                    currentValues.put(array[i][j], percentageOfTotal);
+                                    features.put(j, currentValues);
+                                    continue;
+                                }
+                            }else{
+                                currentValues.put(array[i][j], percentageOfTotal);
+                                features.put(j, currentValues);
+                                continue;
+                            }
                         }
                     }
+
                     featureWithValues.put(array[i][j], percentageOfTotal);
                     features.put(j, featureWithValues);
                 } else {
@@ -151,7 +173,6 @@ public class Main {
             }
             classes.put(array[i][columnIndex], features);
         }
-
 
 //        Object[] features = new Object[classes.size()];
 //        int p = 0;

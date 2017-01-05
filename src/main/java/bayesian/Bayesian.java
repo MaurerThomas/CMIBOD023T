@@ -2,18 +2,24 @@ package bayesian;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Bayesian {
     private static final int FEATURE_PLAYINDOOR = 4;
+    private static final String CLASS_ONE = "Yes";
+    private static final String CLASS_TWO = "No";
     private static File file = new File("data.csv");
     private static Object[][] data = new Object[15][5];
-    private static List<String[]> dataList = new ArrayList<>();
     private Logger logger = Logger.getLogger("myLogger");
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
+    private double priorProbabilityAll = 0;
+    private Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
 
     private Bayesian() {
     }
@@ -40,14 +46,18 @@ public class Bayesian {
         } catch (FileNotFoundException e) {
             logger.log(Level.SEVERE, "Could not find the file: ", e);
         }
-        Map<Object, Map<Integer, Map<Object, Double>>> trainedData = trainDataset(data, FEATURE_PLAYINDOOR);
+        trainDataset(data, FEATURE_PLAYINDOOR);
+        ArrayList<Object> features = new ArrayList<>();
+        features.add("Sunny");
+        features.add("Cool");
+        features.add("High");
+        features.add("True");
+        System.out.println("");
+        System.out.println("Highest probability class: " + classify(features));
     }
 
     private Map<Object, Map<Integer, Map<Object, Double>>> trainDataset(Object[][] array, int columnIndex) {
-        Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
-
         initPossibleClasses(array, columnIndex, classes);
-
         calculatePriorProbability(array, columnIndex);
 
         // Calculate conditional probabilities for every feature.
@@ -96,12 +106,95 @@ public class Bayesian {
         return classes;
     }
 
+    private Object classify(ArrayList<Object> features) {
+        // Store all the probabilities
+        Map<Object, Double> results = new HashMap<>();
+
+        // For every feature in features that exists in classes map for every category take that value and multiply for every feature.
+        for (Map.Entry<Object, Map<Integer, Map<Object, Double>>> entry : classes.entrySet()) {
+            Object priorKey = entry.getKey();
+            double prop;
+
+            if (CLASS_ONE.equals(priorKey)) {
+                prop = priorProbabilityFirstClass / priorProbabilityAll;
+            } else {
+                prop = priorProbabilitySecondClass / priorProbabilityAll;
+            }
+
+            int col = 0;
+            for (Object feature : features) {
+
+                Map<Integer, Map<Object, Double>> columns = entry.getValue();
+                Map<Object, Double> attributesMap = columns.get(col);
+                if (attributesMap.containsKey(feature)) {
+                    // Save probability in a variable
+                    double attribute = attributesMap.get(feature);
+                    prop = prop * attribute;
+                    col += 1;
+                } else {
+                    // we did not find any instances of this attribute value
+                    // occurring with this category so prob = 0
+                    prop = 0;
+                }
+                // Append probability with the category in results.
+                results.put(priorKey, prop);
+            }
+        }
+        printResults(results);
+        Map<Object, Double> normalizedResults = normalize(results);
+        printResults(normalizedResults);
+        // return the category with the highest probability
+        return getMaxValueFromMap(normalizedResults).getKey();
+    }
+
+    private void printResults(Map<Object, Double> results) {
+        System.out.println("Probabilities:");
+        for (Map.Entry<Object, Double> entry : results.entrySet()) {
+            System.out.println("Class: " + entry.getKey() + " P: " + entry.getValue());
+        }
+
+    }
+
+    private Map<Object, Double> normalize(Map<Object, Double> inputResults) {
+        double yes = 0;
+        double no = 0;
+
+        for (Map.Entry<Object, Double> entry : inputResults.entrySet()) {
+            if (entry.getKey().equals(CLASS_ONE)) {
+                yes = entry.getValue();
+            } else {
+                no = entry.getValue();
+            }
+        }
+
+        double denumerator = yes + no;
+        for (Map.Entry<Object, Double> entry : inputResults.entrySet()) {
+            if (entry.getKey().equals(CLASS_ONE)) {
+                inputResults.put(CLASS_ONE, yes / denumerator);
+            } else {
+                inputResults.put(CLASS_TWO, no / denumerator);
+            }
+        }
+
+        return inputResults;
+    }
+
+    private Map.Entry<Object, Double> getMaxValueFromMap(Map<Object, Double> results) {
+        Map.Entry<Object, Double> maxEntry = null;
+        for (Map.Entry<Object, Double> entry : results.entrySet()) {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                maxEntry = entry;
+            }
+        }
+        return maxEntry;
+    }
+
     private double getPercentageOfTotal(Object anObject) {
         double percentageOfTotal = 0;
 
-        if ("Yes".equals(anObject)) {
+        if (CLASS_ONE.equals(anObject)) {
             percentageOfTotal = 1 / priorProbabilityFirstClass;
-        } else if ("No".equals(anObject)) {
+        } else if (CLASS_TWO.equals(anObject)) {
             percentageOfTotal = 1 / priorProbabilitySecondClass;
         }
         return percentageOfTotal;
@@ -119,13 +212,12 @@ public class Bayesian {
     private void calculatePriorProbability(Object[][] array, int columnIndex) {
         // Calculate prior probability
         for (int i = 1; i < array.length; i++) {
-            if ("Yes".equals(array[i][columnIndex])) {
+            if (CLASS_ONE.equals(array[i][columnIndex])) {
                 priorProbabilityFirstClass += 1;
-            } else if ("No".equals(array[i][columnIndex])) {
+            } else if (CLASS_TWO.equals(array[i][columnIndex])) {
                 priorProbabilitySecondClass += 1;
             }
         }
-
     }
 
     private void readMyData() throws FileNotFoundException {
@@ -136,8 +228,8 @@ public class Bayesian {
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
             data[index++] = line.split(delimiter);
-            dataList.add(line.split(delimiter));
         }
+        priorProbabilityAll = index - 1;
         sc.close();
     }
 }

@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Dbscan {
-    private static final int MIN_POINTS = 2;
-    private static final double EPSILON = 10.00;
+    private static final int MIN_POINTS = 4;
+    private static final double EPSILON = 7.00;
     private List<Point> points = new ArrayList<>();
     private List<Cluster> clusters = new ArrayList<>();
-
-
 
     public static void main(String[] args) {
         Dbscan dbscan = new Dbscan();
@@ -40,15 +38,29 @@ public class Dbscan {
 //
 
     private void init() {
-        points.add(new Point(0, 0));
-        points.add(new Point(5, 1));
-        points.add(new Point(3, 2));
-        points.add(new Point(10, 0));
-        points.add(new Point(12, 3));
-        points.add(new Point(30, 15));
-        points.add(new Point(25, 20));
+        points.add(new Point(createNewTestList(0, 0, 0)));
+        points.add(new Point(createNewTestList(5, 1, 0)));
+        points.add(new Point(createNewTestList(3, 2, 0)));
+        points.add(new Point(createNewTestList(10, 0, 0)));
+        points.add(new Point(createNewTestList(12, 3, 0)));
+        points.add(new Point(createNewTestList(30, 15, 0)));
+        points.add(new Point(createNewTestList(25, 20, 0)));
+        points.add(new Point(createNewTestList(250, 200, 0)));
+        points.add(new Point(createNewTestList(249, 200, 0)));
+        points.add(new Point(createNewTestList(248, 201, 0)));
+        points.add(new Point(createNewTestList(247, 202, 0)));
         startCluster();
         clusters.forEach(Cluster::plotCluster);
+    }
+
+    private List<Double> createNewTestList(double... values) {
+        List<Double> testList = new ArrayList<>();
+
+        for (double value : values) {
+            testList.add(value);
+        }
+
+        return testList;
     }
 
     private void startCluster() {
@@ -73,29 +85,21 @@ public class Dbscan {
     private void expandCluster(Point point, List<Point> neighbours, Cluster cluster) {
         cluster.addPoint(point);
 
-        for (Point neighbourPoint : neighbours) {
-            if (!neighbourPoint.isVisited()) {
-                neighbourPoint.setVisited(true);
-                List<Point> newNeighbourPoints = getNeighbours(neighbourPoint);
+        for (int i = 0; i < neighbours.size(); i++) {
+            Point p = neighbours.get(i);
+
+            if (!p.isVisited()) {
+                p.setVisited(true);
+                List<Point> newNeighbourPoints = getNeighbours(p);
                 if (newNeighbourPoints.size() >= MIN_POINTS) {
                     neighbours.addAll(newNeighbourPoints);
                 }
             }
-            if (!pointAlreadyAssignedToCluster(neighbourPoint)) {
-                cluster.addPoint(neighbourPoint);
+            if (!cluster.getPoints().contains(p)) {
+                cluster.addPoint(p);
             }
         }
 
-    }
-
-    private boolean pointAlreadyAssignedToCluster(Point point) {
-        for (Cluster cluster : clusters) {
-            if (cluster.getPoints().contains(point)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private List<Point> getNeighbours(Point dataPoint) {
@@ -110,4 +114,13 @@ public class Dbscan {
         return neighbours;
     }
 
+    private boolean pointAlreadyAssignedToCluster(Point point) {
+        for (Cluster cluster : clusters) {
+            if (cluster.getPoints().contains(point)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

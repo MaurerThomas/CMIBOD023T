@@ -1,14 +1,15 @@
 package dbscan;
 
+import java.util.List;
+
 public class Point {
     private static EuclideanDistance euclideanDistance = new EuclideanDistance();
     private boolean visited = false;
-    private double x;
-    private double y;
 
-    public Point(double x, double y) {
-        this.x = x;
-        this.y = y;
+    private List<Double> properties;
+
+    public Point(List<Double> properties) {
+        this.properties = properties;
     }
 
     public double distance(Point otherPoint) {
@@ -24,12 +25,7 @@ public class Point {
         this.visited = visited;
     }
 
-    public double getX() {
-        return x;
+    public List<Double> getProperties() {
+        return properties;
     }
-
-    public double getY() {
-        return y;
-    }
-
 }

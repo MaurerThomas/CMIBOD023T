@@ -1,51 +1,35 @@
 package bayesian;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import util.DataReader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Bayesian {
     private static final int FEATURE_PLAYINDOOR = 4;
     private static final String CLASS_ONE = "Yes";
     private static final String CLASS_TWO = "No";
-    private static File file = new File("data.csv");
-    private static Object[][] data = new Object[15][5];
-    private Logger logger = Logger.getLogger("myLogger");
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private double priorProbabilityAll = 0;
+    private DataReader dataReader = new DataReader(15, 5);
+
     private Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
 
     private Bayesian() {
     }
 
-    private static void printRow(Object[] row) {
-        for (Object i : row) {
-            System.out.format("%15s", i);
-        }
-        System.out.println();
-    }
 
     public static void main(String[] args) {
         Bayesian bayesian = new Bayesian();
         bayesian.init();
-
     }
 
     private void init() {
-        try {
-            readMyData();
-            for (Object[] row : data) {
-                printRow(row);
-            }
-        } catch (FileNotFoundException e) {
-            logger.log(Level.SEVERE, "Could not find the file: ", e);
-        }
+        Object[][] data = dataReader.getData();
+        priorProbabilityAll = (double) data.length - 1;
+
         trainDataset(data, FEATURE_PLAYINDOOR);
         ArrayList<Object> features = new ArrayList<>();
         features.add("Sunny");
@@ -218,18 +202,5 @@ public class Bayesian {
                 priorProbabilitySecondClass += 1;
             }
         }
-    }
-
-    private void readMyData() throws FileNotFoundException {
-        String delimiter = ";";
-        Scanner sc = new Scanner(file);
-        int index = 0;
-
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
-            data[index++] = line.split(delimiter);
-        }
-        priorProbabilityAll = index - 1;
-        sc.close();
     }
 }

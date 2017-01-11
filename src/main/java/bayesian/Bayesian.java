@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Bayesian {
-    private static final int FEATURE_PLAYINDOOR = 4;
+    private static final int TARGET_CLASS = 4;
     private static final String CLASS_ONE = "Yes";
     private static final String CLASS_TWO = "No";
     private double priorProbabilityFirstClass = 0;
@@ -30,7 +30,7 @@ public class Bayesian {
         Object[][] data = dataReader.getData();
         priorProbabilityAll = (double) data.length - 1;
 
-        trainDataset(data, FEATURE_PLAYINDOOR);
+        trainDataset(data, TARGET_CLASS);
         ArrayList<Object> features = new ArrayList<>();
         features.add("Sunny");
         features.add("Cool");

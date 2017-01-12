@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataReader {
-    private static File file = new File("data.csv");
+    private static File file = new File("mushrooms.csv");
     private Object[][] data;
 
     public DataReader(int rowSize, int columnSize) {
@@ -16,9 +16,9 @@ public class DataReader {
         try {
             readMyData();
 
-            for (Object[] row : data) {
-                printRow(row);
-            }
+//            for (Object[] row : data) {
+//                printRow(row);
+//            }
         } catch (FileNotFoundException e) {
             Logger logger = Logger.getLogger("myLogger");
             logger.log(Level.SEVERE, "Could not find the file: ", e);
@@ -33,11 +33,12 @@ public class DataReader {
     }
 
     private void readMyData() throws FileNotFoundException {
-        String delimiter = ";";
+        String delimiter = ",";
         Scanner sc = new Scanner(file);
         int index = 0;
 
         while (sc.hasNextLine()) {
+
             String line = sc.nextLine();
             data[index++] = line.split(delimiter);
         }

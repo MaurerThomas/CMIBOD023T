@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Bayesian {
-    private static final int TARGET_CLASS = 4;
-    private static final String CLASS_ONE = "Yes";
-    private static final String CLASS_TWO = "No";
+    private static final int TARGET_CLASS = 0;
+    private static final String CLASS_ONE = "e";
+    private static final String CLASS_TWO = "p";
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private double priorProbabilityAll = 0;
-    private DataReader dataReader = new DataReader(15, 5);
+    private DataReader dataReader = new DataReader(8124, 23);
 
     private Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
 
@@ -28,16 +28,51 @@ public class Bayesian {
 
     private void init() {
         Object[][] data = dataReader.getData();
-        priorProbabilityAll = (double) data.length - 1;
+        Object[][] trainingData = createTrainingDataSet(data);
+        priorProbabilityAll = (double) trainingData.length - 1;
 
-        trainDataset(data, TARGET_CLASS);
+        trainDataset(trainingData, TARGET_CLASS);
         ArrayList<Object> features = new ArrayList<>();
-        features.add("Sunny");
-        features.add("Cool");
-        features.add("High");
-        features.add("True");
+        features.add("x");
+        features.add("s");
+        features.add("n");
+        features.add("f");
+        features.add("n");
+        features.add("a");
+        features.add("c");
+        features.add("b");
+        features.add("y");
+        features.add("e");
+        features.add("?");
+        features.add("s");
+        features.add("s");
+        features.add("o");
+        features.add("o");
+        features.add("p");
+        features.add("o");
+        features.add("o");
+        features.add("p");
+        features.add("o");
+        features.add("c");
+        features.add("l");
         System.out.println("");
         System.out.println("Highest probability class: " + classify(features));
+    }
+
+    private Object[][] createTrainingDataSet(Object[][] data) {
+        int dataSetSize = data.length;
+        int trainingDataSetSize = data.length / 3;
+        Object[][] trainingDataSet = new Object[trainingDataSetSize][data[0].length];
+        int numberOfColumns = data[0].length;
+
+        for(int i = 0 ; i < trainingDataSetSize; i++) {
+            for (int j = 0; j < numberOfColumns; j++) {
+                trainingDataSet[i][j] = data[i][j];
+            }
+
+        }
+        return trainingDataSet;
+
     }
 
     private Map<Object, Map<Integer, Map<Object, Double>>> trainDataset(Object[][] array, int columnIndex) {
@@ -105,7 +140,7 @@ public class Bayesian {
                 prop = priorProbabilitySecondClass / priorProbabilityAll;
             }
 
-            int col = 0;
+            int col = 1;
             for (Object feature : features) {
 
                 Map<Integer, Map<Object, Double>> columns = entry.getValue();
@@ -186,7 +221,7 @@ public class Bayesian {
 
     private void initPossibleClasses(Object[][] array, int columnIndex, Map<Object, Map<Integer, Map<Object, Double>>> classes) {
         // Start at 1 because of heading in csv and the data structure.
-        for (int i = 1; i < array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             if (!classes.containsKey(array[i][columnIndex])) {
                 classes.put(array[i][columnIndex], null);
             }

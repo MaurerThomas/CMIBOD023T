@@ -2,8 +2,9 @@ package bayesian;
 
 import util.DataReader;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Bayesian {
@@ -32,31 +33,41 @@ public class Bayesian {
         priorProbabilityAll = (double) trainingData.length - 1;
 
         trainDataset(trainingData, TARGET_CLASS);
-        ArrayList<Object> features = new ArrayList<>();
-        features.add("x");
-        features.add("s");
-        features.add("n");
-        features.add("f");
-        features.add("n");
-        features.add("a");
-        features.add("c");
-        features.add("b");
-        features.add("y");
-        features.add("e");
-        features.add("?");
-        features.add("s");
-        features.add("s");
-        features.add("o");
-        features.add("o");
-        features.add("p");
-        features.add("o");
-        features.add("o");
-        features.add("p");
-        features.add("o");
-        features.add("c");
-        features.add("l");
+//        ArrayList<Object> features = new ArrayList<>();
+//        features.add("x");
+//        features.add("s");
+//        features.add("n");
+//        features.add("f");
+//        features.add("n");
+//        features.add("a");
+//        features.add("c");
+//        features.add("b");
+//        features.add("y");
+//        features.add("e");
+//        features.add("?");
+//        features.add("s");
+//        features.add("s");
+//        features.add("o");
+//        features.add("o");
+//        features.add("p");
+//        features.add("o");
+//        features.add("o");
+//        features.add("p");
+//        features.add("o");
+//        features.add("c");
+//        features.add("l");
         System.out.println("");
-        System.out.println("Highest probability class: " + classify(features));
+
+        double correct = 0;
+
+        for (int i = 0; i < data.length; i++) {
+            if (classify(Arrays.asList(data[i])).equals(data[i][0])) {
+                correct++;
+            }
+        }
+
+        System.out.println("Accuracy: " + (correct / data.length));
+        //System.out.println("Highest probability class: " + classify(features));
     }
 
     private Object[][] createTrainingDataSet(Object[][] data) {
@@ -125,7 +136,7 @@ public class Bayesian {
         return classes;
     }
 
-    private Object classify(ArrayList<Object> features) {
+    private Object classify(List<Object> features) {
         // Store all the probabilities
         Map<Object, Double> results = new HashMap<>();
 
@@ -133,6 +144,7 @@ public class Bayesian {
         for (Map.Entry<Object, Map<Integer, Map<Object, Double>>> entry : classes.entrySet()) {
             Object priorKey = entry.getKey();
             double prop;
+            double attribute;
 
             if (CLASS_ONE.equals(priorKey)) {
                 prop = priorProbabilityFirstClass / priorProbabilityAll;
@@ -145,9 +157,12 @@ public class Bayesian {
 
                 Map<Integer, Map<Object, Double>> columns = entry.getValue();
                 Map<Object, Double> attributesMap = columns.get(col);
+                if (feature.equals("p") || feature.equals("e")) {
+                    continue;
+                }
                 if (attributesMap.containsKey(feature)) {
                     // Save probability in a variable
-                    double attribute = attributesMap.get(feature);
+                    attribute = attributesMap.get(feature);
                     prop = prop * attribute;
                     col += 1;
                 } else {
@@ -156,12 +171,15 @@ public class Bayesian {
                     prop = 0;
                 }
                 // Append probability with the category in results.
-                results.put(priorKey, prop);
+                if (prop > 0.0) {
+                    results.put(priorKey, prop);
+                }
             }
+
         }
-        printResults(results);
+        // printResults(results);
         Map<Object, Double> normalizedResults = normalize(results);
-        printResults(normalizedResults);
+        //printResults(normalizedResults);
         // return the category with the highest probability
         return getMaxValueFromMap(normalizedResults).getKey();
     }

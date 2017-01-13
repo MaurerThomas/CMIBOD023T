@@ -2,10 +2,7 @@ package bayesian;
 
 import util.DataReader;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Bayesian {
     private static final int TARGET_CLASS = 0;
@@ -73,16 +70,21 @@ public class Bayesian {
     private Object[][] createTrainingDataSet(Object[][] data) {
         int dataSetSize = data.length;
         int trainingDataSetSize = data.length / 3;
+        Set<Object[]> subset = new HashSet<>(trainingDataSetSize);
+        Random random = new Random();
         Object[][] trainingDataSet = new Object[trainingDataSetSize][data[0].length];
         int numberOfColumns = data[0].length;
 
         for(int i = 0 ; i < trainingDataSetSize; i++) {
-            for (int j = 0; j < numberOfColumns; j++) {
-                trainingDataSet[i][j] = data[i][j];
+            int index = random.nextInt(data.length);
+            Object[] mushroom = data[index];
+            while(subset.contains(mushroom)) {
+                index = (index + 1) % data.length;
+                mushroom = data[index];
             }
-
+            subset.add(mushroom);
         }
-        return trainingDataSet;
+        return subset.toArray(new Object[subset.size()][]);
 
     }
 
@@ -138,8 +140,9 @@ public class Bayesian {
 
     private Object classify(List<Object> features) {
         // Store all the probabilities
-        Map<Object, Double> results = new HashMap<>();
-
+        //Map<Object, Double> results = new HashMap<>();
+        double bestP = Double.NEGATIVE_INFINITY;
+        Object best = null;
         // For every feature in features that exists in classes map for every category take that value and multiply for every feature.
         for (Map.Entry<Object, Map<Integer, Map<Object, Double>>> entry : classes.entrySet()) {
             Object priorKey = entry.getKey();
@@ -157,9 +160,7 @@ public class Bayesian {
 
                 Map<Integer, Map<Object, Double>> columns = entry.getValue();
                 Map<Object, Double> attributesMap = columns.get(col);
-                if (feature.equals("p") || feature.equals("e")) {
-                    continue;
-                }
+
                 if (attributesMap.containsKey(feature)) {
                     // Save probability in a variable
                     attribute = attributesMap.get(feature);
@@ -171,17 +172,19 @@ public class Bayesian {
                     prop = 0;
                 }
                 // Append probability with the category in results.
-                if (prop > 0.0) {
-                    results.put(priorKey, prop);
+                if (prop > bestP) {
+                    bestP = prop;
+                    best = priorKey;
+                    //results.put(priorKey, prop);
                 }
             }
 
         }
         // printResults(results);
-        Map<Object, Double> normalizedResults = normalize(results);
+        //Map<Object, Double> normalizedResults = normalize(results);
         //printResults(normalizedResults);
         // return the category with the highest probability
-        return getMaxValueFromMap(normalizedResults).getKey();
+        return best;//getMaxValueFromMap(normalizedResults).getKey();
     }
 
     private void printResults(Map<Object, Double> results) {

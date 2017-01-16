@@ -13,7 +13,7 @@ public class Bayesian {
     private double priorProbabilityAll = 0;
     private DataReader dataReader = new DataReader(8124, 23);
 
-    private Map<Object, Map<Integer, Map<Object, Double>>> classes = new HashMap<>();
+    private Map<Object, Map<Integer, Map<Object, Double>>> targetClassesWithConditionalProbabilities = new HashMap<>();
 
     private Bayesian() {
     }
@@ -27,38 +27,17 @@ public class Bayesian {
     private void init() {
         Object[][] data = dataReader.getData();
         Object[][] trainingData = createTrainingDataSet(data);
-        priorProbabilityAll = (double) trainingData.length - 1;
+        priorProbabilityAll = (double) trainingData.length;
 
         trainDataset(trainingData, TARGET_CLASS);
-//        ArrayList<Object> features = new ArrayList<>();
-//        features.add("x");
-//        features.add("s");
-//        features.add("n");
-//        features.add("f");
-//        features.add("n");
-//        features.add("a");
-//        features.add("c");
-//        features.add("b");
-//        features.add("y");
-//        features.add("e");
-//        features.add("?");
-//        features.add("s");
-//        features.add("s");
-//        features.add("o");
-//        features.add("o");
-//        features.add("p");
-//        features.add("o");
-//        features.add("o");
-//        features.add("p");
-//        features.add("o");
-//        features.add("c");
-//        features.add("l");
         System.out.println("");
 
         double correct = 0;
 
         for (int i = 0; i < data.length; i++) {
-            if (classify(Arrays.asList(data[i])).equals(data[i][0])) {
+            Object indexedClass = classify(Arrays.asList(data[i]));
+
+            if (indexedClass.equals(data[i][0])) {
                 correct++;
             }
         }
@@ -88,54 +67,54 @@ public class Bayesian {
 
     }
 
-    private Map<Object, Map<Integer, Map<Object, Double>>> trainDataset(Object[][] array, int columnIndex) {
-        initPossibleClasses(array, columnIndex, classes);
-        calculatePriorProbability(array, columnIndex);
+    private Map<Object, Map<Integer, Map<Object, Double>>> trainDataset(Object[][] trainingData, int targetColumn) {
+        initPossibleClasses(trainingData, targetColumn, targetClassesWithConditionalProbabilities);
+        calculatePriorProbability(trainingData, targetColumn);
 
         // Calculate conditional probabilities for every feature.
-        for (int i = 1; i < array.length; i++) {
+        for (int i = 0; i < trainingData.length; i++) {
             Map<Integer, Map<Object, Double>> features = new HashMap<>();
-            for (int j = 0; j < array[i].length; j++) {
+            for (int j = 0; j < trainingData[i].length; j++) {
                 Map<Object, Double> featureWithValues = new HashMap<>();
 
-                // Skip column 4(classes)
-                if (j == columnIndex) {
+                // Skip column 4(targetClassesWithConditionalProbabilities)
+                if (j == targetColumn) {
                     continue;
                 }
 
-                // Calculates conditional probability for this feature where class is "Yes" or "No".
-                double percentageOfTotal = getPercentageOfTotal(array[i][columnIndex]);
+                // Calculates conditional probability for this feature for the target class.
+                double percentageOfTotal = getPercentageOfTotal(trainingData[i][targetColumn]);
 
-                // Check if class exists (Yes/No). Yes then check if feature exists. No then add the class and feature.
-                if (classes.get(array[i][columnIndex]) != null && classes.containsKey(array[i][columnIndex])) {
+                // Check if target class exists. Yes then check if feature exists. No then add the class and feature.
+                if (targetClassesWithConditionalProbabilities.get(trainingData[i][targetColumn]) != null && targetClassesWithConditionalProbabilities.containsKey(trainingData[i][targetColumn])) {
                     Map<Integer, Map<Object, Double>> currentFeatures;
-                    currentFeatures = classes.get(array[i][columnIndex]);
+                    currentFeatures = targetClassesWithConditionalProbabilities.get(trainingData[i][targetColumn]);
 
                     // Check if feature exists, if yes then get the Map of this feature.
                     Map<Object, Double> currentValues = currentFeatures.get(j);
                     //If the feature exists, update the percentage.
-                    if (currentFeatures.containsKey(j) && currentValues.containsKey(array[i][j])) {
-                        percentageOfTotal += currentValues.get(array[i][j]);
+                    if (currentFeatures.containsKey(j) && currentValues.containsKey(trainingData[i][j])) {
+                        percentageOfTotal += currentValues.get(trainingData[i][j]);
 
                         if (currentValues.size() > 1) {
-                            currentValues.put(array[i][j], percentageOfTotal);
+                            currentValues.put(trainingData[i][j], percentageOfTotal);
                             features.put(j, currentValues);
                             continue;
                         }
                     } else {
-                        currentValues.put(array[i][j], percentageOfTotal);
+                        currentValues.put(trainingData[i][j], percentageOfTotal);
                         features.put(j, currentValues);
                         continue;
                     }
 
                 }
-                featureWithValues.put(array[i][j], percentageOfTotal);
+                featureWithValues.put(trainingData[i][j], percentageOfTotal);
                 features.put(j, featureWithValues);
             }
-            classes.put(array[i][columnIndex], features);
+            targetClassesWithConditionalProbabilities.put(trainingData[i][targetColumn], features);
         }
 
-        return classes;
+        return targetClassesWithConditionalProbabilities;
     }
 
     private Object classify(List<Object> features) {
@@ -143,8 +122,9 @@ public class Bayesian {
         //Map<Object, Double> results = new HashMap<>();
         double bestP = Double.NEGATIVE_INFINITY;
         Object best = null;
-        // For every feature in features that exists in classes map for every category take that value and multiply for every feature.
-        for (Map.Entry<Object, Map<Integer, Map<Object, Double>>> entry : classes.entrySet()) {
+
+        // For every feature in features that exists in targetClassesWithConditionalProbabilities map for every category take that value and multiply for every feature.
+        for (Map.Entry<Object, Map<Integer, Map<Object, Double>>> entry : targetClassesWithConditionalProbabilities.entrySet()) {
             Object priorKey = entry.getKey();
             double prop;
             double attribute;

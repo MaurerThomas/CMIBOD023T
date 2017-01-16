@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataReader {
-    private static File file = new File("mushrooms.csv");
+    private static File file = new File("data.csv");
     private Object[][] data;
 
     public DataReader(int rowSize, int columnSize) {

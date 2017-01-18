@@ -2,16 +2,22 @@ package decisiontree;
 
 import util.DataReader;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DecisionTreeAlgorithm {
     private static final int TARGET_CLASS = 4;
     private static final String CLASS_ONE = "Yes";
     private static final String CLASS_TWO = "No";
+    private static final double LN2 = Math.log(2);
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private DataReader dataReader = new DataReader(15, 5);
-    private static final double LN2 = Math.log(2);
+    private List<Attribute> attributes = new ArrayList<>();
+    private Object[][] data = dataReader.getData();
 
 //    Begin
 
@@ -49,21 +55,52 @@ public class DecisionTreeAlgorithm {
         decisionTreeAlgorithm.init();
     }
 
+    private static double log2(double value) {
+        return Math.log(value) / LN2;
+    }
+
+    private static Map<String, Integer> calculateFrequency(List<String> terms) {
+        return terms.parallelStream().
+                flatMap(s -> Arrays.asList(s.split(" ")).stream()).
+                collect(Collectors.toConcurrentMap(String::toString, w -> 1, Integer::sum));
+    }
+
+    private static <T> List<T> twoDArrayToList(Object[][] twoDArray) {
+        List<T> list = new ArrayList<>();
+        for (Object[] array : twoDArray) {
+            list.addAll(Arrays.asList((T[]) array));
+        }
+        return list;
+    }
+
     private void init() {
-        Object[][] data = dataReader.getData();
         calculatePriorProbability(data, TARGET_CLASS);
+
         calculateEntropyForOneAttribute(priorProbabilityFirstClass, priorProbabilitySecondClass);
 
-        //Read CSV
-        //Collect all attributes (outlook, humidity etc) from data
-        //Set all valueAttributes invalueAttributeMap
+        setAllAttributes();
 
-        //Foreach attribute in attributes
-            //Get valueAttributeMap
-            //Foreach valueAttribute in valueAttributeMap
-                //Set Frequency valueAttribute
-            //End foreach
-        // End foreach
+        setValueAttributesForAttributes();
+
+        Map<String, Integer> calculateFrequency = calculateFrequency(twoDArrayToList(data));
+
+        setFrequencyForValueAttributes(calculateFrequency);
+
+
+        // Calculate frequency for every valueAttribute for every class
+        int countYes = 0;
+        int countNo = 0;
+        for (int i = 1; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+
+                if (data[i][j].equals(mapEntry.getKey()) && data[i][TARGET_CLASS].equals(CLASS_ONE)) {
+                    countYes += 1;
+                } else {
+                    countNo += 1;
+                }
+
+            }
+        }
 
         //calculateEntropyForOneAttribute()
         //Set entropy for valueAttribute
@@ -73,10 +110,50 @@ public class DecisionTreeAlgorithm {
         //End foreach
     }
 
+    private void setFrequencyForValueAttributes(Map<String, Integer> calculateFrequency) {
+        //Foreach attribute in attributes
+        for (Attribute attribute : attributes) {
+            //Get valueAttributeMap
+            //Foreach valueAttribute in valueAttributeMap
+            for (Map.Entry<String, ValueAttribute> mapEntry : attribute.getValueAttributeMap().entrySet()) {
+                //Set Frequency valueAttribute
+                int frequency = calculateFrequency.get(mapEntry.getKey());
+                mapEntry.getValue().setFrequency(frequency);
+            }
+        }
+    }
+
+    private void setValueAttributesForAttributes() {
+        // Skip attributes from dataset
+        // Set all valueAttributes in valueAttributeMap
+        for (int i = 1; i < data.length; i++) {
+            for (int j = 0; j < attributes.size(); j++) {
+                if (i != TARGET_CLASS) {
+                    ValueAttribute valueAttribute = new ValueAttribute();
+                    Attribute attribute = attributes.get(j);
+
+                    valueAttribute.setName(data[i][j].toString());
+                    attribute.getValueAttributeMap().put(valueAttribute.getName(), valueAttribute);
+
+                }
+            }
+        }
+    }
+
+    private void setAllAttributes() {
+        //Collect all attributes from data
+        for (int i = 0; i < data[0].length; i++) {
+            if (i != TARGET_CLASS) {
+                Attribute attribute = new Attribute();
+                attribute.setName(data[i].toString());
+                attributes.add(attribute);
+            }
+        }
+    }
+
     private void classify() {
 
     }
-
 
     private double calculateEntropyForOneAttribute(double frequencyOne, double frequencyTwo) {
         double entropy;
@@ -99,10 +176,6 @@ public class DecisionTreeAlgorithm {
         return entropy;
     }
 
-    private static double log2(double value) {
-        return Math.log(value) / LN2;
-    }
-
     private void calculatePriorProbability(Object[][] array, int columnIndex) {
         // Calculate prior probability
         for (int i = 1; i < array.length; i++) {
@@ -113,6 +186,4 @@ public class DecisionTreeAlgorithm {
             }
         }
     }
-
-
 }

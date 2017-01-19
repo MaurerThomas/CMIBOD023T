@@ -7,7 +7,7 @@ public class Attribute {
 
     private String name;
     private Map<String, ValueAttribute> valueAttributeMap = new HashMap<>();
-    private int index;
+    private double gain;
 
     public String getName() {
         return name;
@@ -25,11 +25,11 @@ public class Attribute {
         this.valueAttributeMap = valueAttributeMap;
     }
 
-    public int getIndex() {
-        return index;
+    public double getGain() {
+        return gain;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setGain(double gain) {
+        this.gain = gain;
     }
 }

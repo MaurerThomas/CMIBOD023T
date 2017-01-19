@@ -1,6 +1,7 @@
 package dbscan;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Dbscan {
@@ -38,29 +39,19 @@ public class Dbscan {
 //
 
     private void init() {
-        points.add(new Point(createNewTestList(0, 0, 0)));
-        points.add(new Point(createNewTestList(5, 1, 0)));
-        points.add(new Point(createNewTestList(3, 2, 0)));
-        points.add(new Point(createNewTestList(10, 0, 0)));
-        points.add(new Point(createNewTestList(12, 3, 0)));
-        points.add(new Point(createNewTestList(30, 15, 0)));
-        points.add(new Point(createNewTestList(25, 20, 0)));
-        points.add(new Point(createNewTestList(250, 200, 0)));
-        points.add(new Point(createNewTestList(249, 200, 0)));
-        points.add(new Point(createNewTestList(248, 201, 0)));
-        points.add(new Point(createNewTestList(247, 202, 0)));
+        points.add(new Point(Arrays.asList(0d, 0d, 0d)));
+        points.add(new Point(Arrays.asList(5d, 1d, 0d)));
+        points.add(new Point(Arrays.asList(3d, 2d, 0d)));
+        points.add(new Point(Arrays.asList(10d, 0d, 0d)));
+        points.add(new Point(Arrays.asList(12d, 3d, 0d)));
+        points.add(new Point(Arrays.asList(30d, 15d, 0d)));
+        points.add(new Point(Arrays.asList(25d, 20d, 0d)));
+        points.add(new Point(Arrays.asList(250d, 200d, 0d)));
+        points.add(new Point(Arrays.asList(249d, 200d, 0d)));
+        points.add(new Point(Arrays.asList(248d, 201d, 0d)));
+        points.add(new Point(Arrays.asList(247d, 202d, 0d)));
         startCluster();
         clusters.forEach(Cluster::plotCluster);
-    }
-
-    private List<Double> createNewTestList(double... values) {
-        List<Double> testList = new ArrayList<>();
-
-        for (double value : values) {
-            testList.add(value);
-        }
-
-        return testList;
     }
 
     private void startCluster() {

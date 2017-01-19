@@ -16,9 +16,9 @@ public class DataReader {
         try {
             readMyData();
 
-            for (Object[] row : data) {
-                printRow(row);
-            }
+//            for (Object[] row : data) {
+//                printRow(row);
+//            }
         } catch (FileNotFoundException e) {
             Logger logger = Logger.getLogger("myLogger");
             logger.log(Level.SEVERE, "Could not find the file: ", e);
@@ -33,11 +33,13 @@ public class DataReader {
     }
 
     private void readMyData() throws FileNotFoundException {
-        String delimiter = ";";
+        String delimiter = ",";
         Scanner sc = new Scanner(file);
         int index = 0;
 
+        //sc.nextLine();
         while (sc.hasNextLine()) {
+
             String line = sc.nextLine();
             data[index++] = line.split(delimiter);
         }

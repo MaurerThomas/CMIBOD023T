@@ -37,6 +37,7 @@ public class DataReader {
         Scanner sc = new Scanner(file);
         int index = 0;
 
+        //sc.nextLine();
         while (sc.hasNextLine()) {
 
             String line = sc.nextLine();

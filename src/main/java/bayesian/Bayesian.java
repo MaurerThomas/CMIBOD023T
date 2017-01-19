@@ -7,13 +7,14 @@ import java.util.*;
 import static java.lang.Math.log;
 
 public class Bayesian {
-    private static final int TARGET_CLASS = 0;
-    private static final String CLASS_ONE = "e";
-    private static final String CLASS_TWO = "p";
+    private static final int TARGET_CLASS = 4;
+    private static final String CLASS_ONE = "Yes";
+    private static final String CLASS_TWO = "No";
+    private static final long SEED = 1;
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private double priorProbabilityAll = 0;
-    private DataReader dataReader = new DataReader(8124, 23);
+    private DataReader dataReader = new DataReader(14, 5);
     private Map<Object, Map<Integer, Map<Object, Double>>> targetClassesWithConditionalProbabilities = new HashMap<>();
 
     private Bayesian() {
@@ -35,7 +36,7 @@ public class Bayesian {
         for (int i = 0; i < data.length; i++) {
             Object indexedClass = classify(Arrays.asList(data[i]));
 
-            if (indexedClass.equals(data[i][0])) {
+            if (indexedClass.equals(data[i][TARGET_CLASS])) {
                 correct++;
             }
         }
@@ -45,7 +46,7 @@ public class Bayesian {
     private Object[][] createTrainingDataSet(Object[][] data) {
         int trainingDataSetSize = data.length / 3;
         Set<Object[]> subset = new HashSet<>(trainingDataSetSize);
-        Random random = new Random();
+        Random random = new Random(SEED);
 
         for (int i = 0; i < trainingDataSetSize; i++) {
             int index = random.nextInt(data.length);

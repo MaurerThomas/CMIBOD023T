@@ -16,44 +16,10 @@ public class DecisionTreeAlgorithm {
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private DataReader dataReader = new DataReader(15, 5);
+
     private List<Attribute> attributes = new ArrayList<>();
     private Object[][] data = dataReader.getData();
-
-//    Begin
-
-//    Load learning sets first, create decision tree root
-//    node 'rootNode', add learning set S into root node
-//    as its subset.
-
-//   For rootNode, we compute
-//   Entropy(rootNode.subset) first
-//      If Entropy(rootNode.subset)==0,
-//          then
-//      rootNode.subset consists of records
-//      all with the same value for the
-//      categorical attribute, return a leaf node
-//      with decision attribute: attribute value.
-
-//    If Entropy(rootNode.subset)!=0,
-//      then
-//    compute information gain for each
-//    attribute left(have not been used in
-//    splitting), find attribute A with
-//    Maximum(Gain(S,A)). Create child
-//    nodes of this rootNode and add to
-//    rootNode in the decision tree.
-//    For each child of the rootNode, apply
-//    ID3(S,A,V) recursively until reach
-//    node that has entropy=0 or reach
-//    leaf node.
-
-//    End ID3.
-
-
-    public static void main(String[] args) {
-        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
-        decisionTreeAlgorithm.init();
-    }
+    private double priorProbabilityAll = 0;
 
     private static double log2(double value) {
         return Math.log(value) / LN2;
@@ -73,41 +39,76 @@ public class DecisionTreeAlgorithm {
         return list;
     }
 
-    private void init() {
+    public void init() {
+        priorProbabilityAll = (double) data.length - 1;
+
         calculatePriorProbability(data, TARGET_CLASS);
 
-        calculateEntropyForOneAttribute(priorProbabilityFirstClass, priorProbabilitySecondClass);
+        Map<String, Integer> calculateFrequency = calculateFrequency(twoDArrayToList(data));
 
         setAllAttributes();
 
         setValueAttributesForAttributes();
 
-        Map<String, Integer> calculateFrequency = calculateFrequency(twoDArrayToList(data));
-
         setFrequencyForValueAttributes(calculateFrequency);
 
+        setTargetClassFrequenciesForEveryValueAttribute();
 
-        // Calculate frequency for every valueAttribute for every class
-        int countYes = 0;
-        int countNo = 0;
-        for (int i = 1; i < data.length; i++) {
-            for (int j = 0; j < data[i].length; j++) {
+        setEntropyForValueAttributes();
 
-                if (data[i][j].equals(mapEntry.getKey()) && data[i][TARGET_CLASS].equals(CLASS_ONE)) {
-                    countYes += 1;
-                } else {
-                    countNo += 1;
-                }
+        calculateAttributeGain();
 
+    }
+
+    Attribute getMaximumInformationGain(List<Attribute> attributes) {
+        Attribute bestAttribute = null;
+        double bestGain = Double.NEGATIVE_INFINITY;
+
+        for (Attribute attribute : attributes) {
+            if (attribute.getGain() > bestGain) {
+                bestGain = attribute.getGain();
+                bestAttribute = attribute;
             }
         }
+        return bestAttribute;
+    }
 
-        //calculateEntropyForOneAttribute()
-        //Set entropy for valueAttribute
+    private void calculateAttributeGain() {
+        for (Attribute attribute : attributes) {
+            Double attributeEntropy = calculateEntropyForTwoAttributes(attribute);
+            Double targetClassEntropy = calculateEntropyForOneAttribute(priorProbabilityFirstClass, priorProbabilitySecondClass);
+            attribute.setGain(targetClassEntropy - attributeEntropy);
+        }
+    }
 
-        //Foreach attribute in attributes
-            //calculateEntropyForTwoAttributes()
-        //End foreach
+    private void setEntropyForValueAttributes() {
+        for (int i = 1; i < data.length; i++) {
+            for (int j = 0; j < data[i].length - 1; j++) {
+                Map<String, ValueAttribute> valueAttributeMap = attributes.get(j).getValueAttributeMap();
+                for (Map.Entry<String, ValueAttribute> mapEntry : valueAttributeMap.entrySet()) {
+                    ValueAttribute valueAttribute = mapEntry.getValue();
+                    Double frequencyYes = valueAttribute.getTargetClassesFrequency().get(CLASS_ONE);
+                    Double frequencyNo = valueAttribute.getTargetClassesFrequency().get(CLASS_TWO);
+
+                    Double entropy = calculateEntropyForOneAttribute(frequencyNo, frequencyYes);
+                    valueAttribute.setEntropy(entropy);
+                }
+            }
+        }
+    }
+
+    private void setTargetClassFrequenciesForEveryValueAttribute() {
+        // Calculate frequency for every valueAttribute for every class
+        for (int i = 1; i < data.length; i++) {
+            for (int j = 0; j < data[i].length - 1; j++) {
+                ValueAttribute valueAttribute = attributes.get(j).getValueAttributeMap().get(data[i][j].toString());
+                if (data[i][TARGET_CLASS].equals(CLASS_ONE)) {
+                    valueAttribute.getTargetClassesFrequency().put(CLASS_ONE, valueAttribute.getTargetClassesFrequency().get(CLASS_ONE) + 1d);
+                } else {
+                    valueAttribute.getTargetClassesFrequency().put(CLASS_TWO, valueAttribute.getTargetClassesFrequency().get(CLASS_TWO) + 1d);
+                }
+            }
+        }
     }
 
     private void setFrequencyForValueAttributes(Map<String, Integer> calculateFrequency) {
@@ -133,6 +134,8 @@ public class DecisionTreeAlgorithm {
                     Attribute attribute = attributes.get(j);
 
                     valueAttribute.setName(data[i][j].toString());
+                    valueAttribute.getTargetClassesFrequency().put(CLASS_ONE, 0d);
+                    valueAttribute.getTargetClassesFrequency().put(CLASS_TWO, 0d);
                     attribute.getValueAttributeMap().put(valueAttribute.getName(), valueAttribute);
 
                 }
@@ -142,25 +145,27 @@ public class DecisionTreeAlgorithm {
 
     private void setAllAttributes() {
         //Collect all attributes from data
-        for (int i = 0; i < data[0].length; i++) {
+        List<Object> attributesFromData = Arrays.asList(data[0]);
+
+        for (int i = 0; i < attributesFromData.size(); i++) {
             if (i != TARGET_CLASS) {
                 Attribute attribute = new Attribute();
-                attribute.setName(data[i].toString());
+                attribute.setName(attributesFromData.get(i).toString());
                 attributes.add(attribute);
             }
         }
-    }
-
-    private void classify() {
 
     }
 
     private double calculateEntropyForOneAttribute(double frequencyOne, double frequencyTwo) {
-        double entropy;
-        double percentageOne = frequencyOne / (frequencyOne + frequencyTwo);
-        double percentageTwo = frequencyTwo / (frequencyOne + frequencyTwo);
+        double entropy = 0;
+        if (frequencyOne > 0 && frequencyTwo > 0) {
+            double percentageOne = frequencyOne / (frequencyOne + frequencyTwo);
+            double percentageTwo = frequencyTwo / (frequencyOne + frequencyTwo);
 
-        entropy = -(percentageOne*log2(percentageOne))-(percentageTwo*log2(percentageTwo));
+            entropy = -(percentageOne * log2(percentageOne)) - (percentageTwo * log2(percentageTwo));
+        }
+
 
         return entropy;
     }
@@ -171,7 +176,7 @@ public class DecisionTreeAlgorithm {
 
         for (Map.Entry<String, ValueAttribute> mapEntry : attributeMap.entrySet()) {
             ValueAttribute valueAttribute = mapEntry.getValue();
-            entropy += valueAttribute.getFrequency() * valueAttribute.getEntropy();
+            entropy += (valueAttribute.getFrequency() / priorProbabilityAll) * valueAttribute.getEntropy();
         }
         return entropy;
     }
@@ -185,5 +190,9 @@ public class DecisionTreeAlgorithm {
                 priorProbabilitySecondClass += 1;
             }
         }
+    }
+
+    public List<Attribute> getAttributes() {
+        return attributes;
     }
 }

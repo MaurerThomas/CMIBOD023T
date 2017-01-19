@@ -8,7 +8,7 @@ public class ValueAttribute {
     private String name;
     private double entropy;
     private double frequency;
-    private Map<String, Double> frequencyMap = new HashMap<>();
+    private Map<String, Double> targetClassesFrequency = new HashMap<>();
 
     public String getName() {
         return name;
@@ -34,11 +34,11 @@ public class ValueAttribute {
         this.frequency = frequency;
     }
 
-    public Map<String, Double> getFrequencyMap() {
-        return frequencyMap;
+    public Map<String, Double> getTargetClassesFrequency() {
+        return targetClassesFrequency;
     }
 
-    public void setFrequencyMap(Map<String, Double> frequencyMap) {
-        this.frequencyMap = frequencyMap;
+    public void setTargetClassesFrequency(Map<String, Double> targetClassesFrequency) {
+        this.targetClassesFrequency = targetClassesFrequency;
     }
 }

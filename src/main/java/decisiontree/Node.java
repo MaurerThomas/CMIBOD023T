@@ -3,7 +3,7 @@ package decisiontree;
 public abstract class Node {
     private boolean isLeaf;
     private String label;
-    private int index;
+    private double entropy;
 
     public boolean isLeaf() {
         return this.isLeaf;
@@ -21,11 +21,11 @@ public abstract class Node {
         this.label = label;
     }
 
-    public int getIndex() {
-        return index;
+    public double getEntropy() {
+        return entropy;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    private void calculateEntropy() {
+        
     }
 }

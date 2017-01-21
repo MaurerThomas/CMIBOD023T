@@ -46,7 +46,7 @@ public class Bayesian {
     private Object[][] createTrainingDataSet(Object[][] data) {
         int trainingDataSetSize = data.length / 3;
         Set<Object[]> subset = new HashSet<>(trainingDataSetSize);
-        Random random = new Random(SEED);
+        Random random = new Random();
 
         for (int i = 0; i < trainingDataSetSize; i++) {
             int index = random.nextInt(data.length);

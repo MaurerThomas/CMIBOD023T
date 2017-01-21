@@ -9,6 +9,7 @@ public class Tree {
     private TreeNode root;
 
 
+
     //    Begin
 
 //    Load learning sets first, create decision tree root
@@ -30,7 +31,7 @@ public class Tree {
 //    attribute left(have not been used in
 //    splitting), find attribute A with
 //    Maximum(Gain(S,A)). Create child
-//    nodes of this rootNode and add to
+//    treeNodes of this rootNode and add to
 //    rootNode in the decision tree.
 //    For each child of the rootNode, apply
 //    ID3(S,A,V) recursively until reach
@@ -47,16 +48,18 @@ public class Tree {
     private void init() {
         decisionTreeAlgorithm.init();
         attributes = decisionTreeAlgorithm.getAttributes();
-        train();
+        buildDecisionTree();
 
     }
 
-    public void train() {
+    public void buildDecisionTree() {
         Attribute rootAttribute = decisionTreeAlgorithm.getMaximumInformationGain(attributes);
 
-        TreeNode root = new TreeNode(attributes, rootAttribute);
+        root = new TreeNode(attributes, rootAttribute);
 
+    }
 
+    private void removeUsedAttribute(List<Attribute> attributes) {
 
     }
 

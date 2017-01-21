@@ -8,11 +8,12 @@ import java.util.Map;
 public class TreeNode extends Node {
     private List<Attribute> attributes = new ArrayList<>();
     private Map<String, TreeNode> children = new HashMap<>();
-    private Attribute attribute = new Attribute();
+    private Attribute root = new Attribute();
+
 
 
     public TreeNode(List<Attribute> subset, Attribute rootAttribute) {
         this.attributes = subset;
-        this.attribute = rootAttribute;
+        this.root = rootAttribute;
     }
 }

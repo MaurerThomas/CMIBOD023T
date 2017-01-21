@@ -2,13 +2,12 @@ package decisiontree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Tree {
     private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
     private List<Attribute> attributes = new ArrayList<>();
-    private TreeNode root;
-
-
+    private TreeNode root = new TreeNode();
 
     //    Begin
 
@@ -48,19 +47,36 @@ public class Tree {
     private void init() {
         decisionTreeAlgorithm.init();
         attributes = decisionTreeAlgorithm.getAttributes();
-        buildDecisionTree();
+        buildDecisionTree(root);
 
     }
 
-    public void buildDecisionTree() {
-        Attribute rootAttribute = decisionTreeAlgorithm.getMaximumInformationGain(attributes);
+    private void buildDecisionTree(TreeNode currentNode) {
+        Attribute bestAttribute = decisionTreeAlgorithm.getMaximumInformationGain(attributes);
+        if (bestAttribute == null) {
+            currentNode.setLeaf(true);
+        }
+        if (bestAttribute != null) {
+            currentNode.setLabel(bestAttribute.getName());
+        }
+        attributes.remove(bestAttribute);
 
-        root = new TreeNode(attributes, rootAttribute);
+        Map<String, ValueAttribute> valueAttributeMap = bestAttribute.getValueAttributeMap();
 
+        for (Map.Entry<String, ValueAttribute> entry : valueAttributeMap.entrySet()) {
+            ValueAttribute currentValueAttribute = entry.getValue();
+            String currentValueAttributeName = entry.getKey();
+
+            if (currentValueAttribute.getEntropy() <= 0.0) {
+                TreeNode leafNode = new TreeNode();
+                leafNode.setLabel(currentValueAttributeName);
+                leafNode.setLeaf(true);
+            } else {
+                TreeNode newNode = new TreeNode();
+                currentNode.getChildren().put(currentValueAttributeName, newNode);
+                // Subset meegeven, bijvoorbeeld in ValueAttribute
+                buildDecisionTree(newNode);
+            }
+        }
     }
-
-    private void removeUsedAttribute(List<Attribute> attributes) {
-
-    }
-
 }

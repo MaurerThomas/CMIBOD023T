@@ -72,8 +72,11 @@ public class Tree {
                 leafNode.setLabel(currentValueAttributeName);
                 leafNode.setLeaf(true);
             } else {
+                Object[][] subset = decisionTreeAlgorithm.getSubsetForValueAttribute(currentValueAttribute);
+                //decisionTreeAlgorithm.calculateAttributeGainForSubset(subset, currentValueAttribute);
+
                 TreeNode newNode = new TreeNode();
-                currentNode.getChildren().put(currentValueAttributeName, newNode);
+                //currentNode.getChildren().put(currentValueAttributeName, newNode);
                 // Subset meegeven, bijvoorbeeld in ValueAttribute
                 buildDecisionTree(newNode);
             }

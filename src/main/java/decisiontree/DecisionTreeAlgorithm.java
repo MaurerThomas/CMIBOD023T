@@ -81,6 +81,21 @@ public class DecisionTreeAlgorithm {
         }
     }
 
+    public void calculateAttributeGainForSubset(List<Object> subset, ValueAttribute targetValueAttribute) {
+        for (Attribute attribute : attributes) {
+
+            double freq1 = targetValueAttribute.getTargetClassesFrequency().get(CLASS_ONE);
+            double freq2 = targetValueAttribute.getTargetClassesFrequency().get(CLASS_TWO);
+
+            Double attributeEntropy = calculateEntropyForTwoAttributes(targetValueAttribute);
+            Double targetClassEntropy = calculateEntropyForOneAttribute(freq1, freq2);
+
+            attribute.setGain(targetClassEntropy - attributeEntropy);
+
+        }
+
+    }
+
     private void setEntropyForValueAttributes() {
         for (int i = 1; i < data.length; i++) {
             for (int j = 0; j < data[i].length - 1; j++) {
@@ -109,6 +124,30 @@ public class DecisionTreeAlgorithm {
                 }
             }
         }
+    }
+
+    private void setTargetClassFrequenciesForEveryValueAttribute(Object[][] subset) {
+        for (int i = 1; i < subset.length; i++) {
+            for (int j = 0; j < subset[i].length - 1; j++) {
+                // Calculate frequencies for subset
+
+
+            }
+        }
+    }
+
+    public Object[][] getSubsetForValueAttribute(ValueAttribute valueAttribute) {
+        Object[][] subset = new Object[(int) valueAttribute.getFrequency()][data[0].length];
+        int index = 0;
+        for (int i = 1; i < data.length; i++) {
+            for (int j = 0; j < data[i].length - 1; j++) {
+                if (data[i][j].equals(valueAttribute.getName())) {
+                    subset[index++] = data[i];
+                }
+            }
+        }
+        setTargetClassFrequenciesForEveryValueAttribute(subset);
+        return subset;
     }
 
     private void setFrequencyForValueAttributes(Map<String, Integer> calculateFrequency) {
@@ -178,6 +217,14 @@ public class DecisionTreeAlgorithm {
             ValueAttribute valueAttribute = mapEntry.getValue();
             entropy += (valueAttribute.getFrequency() / priorProbabilityAll) * valueAttribute.getEntropy();
         }
+        return entropy;
+    }
+
+    private double calculateEntropyForTwoAttributes(ValueAttribute valueAttribute) {
+        double entropy = 0;
+
+        entropy += (valueAttribute.getFrequency() / priorProbabilityAll) * valueAttribute.getEntropy();
+
         return entropy;
     }
 

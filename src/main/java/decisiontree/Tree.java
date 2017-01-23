@@ -1,5 +1,7 @@
 package decisiontree;
 
+import util.DataReader;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ public class Tree {
     private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
     private List<Attribute> attributes = new ArrayList<>();
     private TreeNode root = new TreeNode();
+    private DataReader dataReader = new DataReader(15, 5);
 
     //    Begin
 
@@ -45,13 +48,15 @@ public class Tree {
     }
 
     private void init() {
-        decisionTreeAlgorithm.init();
-        attributes = decisionTreeAlgorithm.getAttributes();
-        buildDecisionTree(root);
+        Object[][] dataset = dataReader.getData();
 
+        decisionTreeAlgorithm.init(dataset);
+        attributes = decisionTreeAlgorithm.getAttributes();
+
+        buildDecisionTree(root, dataset);
     }
 
-    private void buildDecisionTree(TreeNode currentNode) {
+    private void buildDecisionTree(TreeNode currentNode, Object[][] dataset) {
         Attribute bestAttribute = decisionTreeAlgorithm.getMaximumInformationGain(attributes);
         if (bestAttribute == null) {
             currentNode.setLeaf(true);
@@ -71,14 +76,15 @@ public class Tree {
                 TreeNode leafNode = new TreeNode();
                 leafNode.setLabel(currentValueAttributeName);
                 leafNode.setLeaf(true);
+                currentNode.getChildren().put(currentValueAttributeName, leafNode);
             } else {
-                Object[][] subset = decisionTreeAlgorithm.getSubsetForValueAttribute(currentValueAttribute);
-                //decisionTreeAlgorithm.calculateAttributeGainForSubset(subset, currentValueAttribute);
+                Object[][] subset = decisionTreeAlgorithm.getSubsetForValueAttribute(currentValueAttribute, dataset);
+                decisionTreeAlgorithm.init(subset);
 
                 TreeNode newNode = new TreeNode();
-                //currentNode.getChildren().put(currentValueAttributeName, newNode);
-                // Subset meegeven, bijvoorbeeld in ValueAttribute
-                buildDecisionTree(newNode);
+                currentNode.getChildren().put(currentValueAttributeName, newNode);
+                // Subset meegeven
+                buildDecisionTree(newNode, subset);
             }
         }
     }

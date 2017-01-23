@@ -1,6 +1,6 @@
 package decisiontree;
 
-import util.DataReader;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,11 +15,9 @@ public class DecisionTreeAlgorithm {
     private static final double LN2 = Math.log(2);
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
-    private DataReader dataReader = new DataReader(15, 5);
-
     private List<Attribute> attributes = new ArrayList<>();
-    private Object[][] data = dataReader.getData();
     private double priorProbabilityAll = 0;
+    private boolean runFirstTime = true;
 
     private static double log2(double value) {
         return Math.log(value) / LN2;
@@ -39,25 +37,33 @@ public class DecisionTreeAlgorithm {
         return list;
     }
 
-    public void init() {
-        priorProbabilityAll = (double) data.length - 1;
+    public void init(Object[][] dataset) {
 
-        calculatePriorProbability(data, TARGET_CLASS);
+        Map<String, Integer> calculateFrequency = calculateFrequency(twoDArrayToList(dataset));
 
-        Map<String, Integer> calculateFrequency = calculateFrequency(twoDArrayToList(data));
+        priorProbabilityAll = (double) dataset.length;
 
-        setAllAttributes();
+        calculatePriorProbability(dataset, TARGET_CLASS);
 
-        setValueAttributesForAttributes();
+        if (runFirstTime) {
+            priorProbabilityAll = (double) dataset.length - 1;
+            dataset = setAllAttributes(dataset);
+            setValueAttributesForAttributes(dataset);
+            runFirstTime = false;
+        }
 
         setFrequencyForValueAttributes(calculateFrequency);
 
-        setTargetClassFrequenciesForEveryValueAttribute();
+        setTargetClassFrequenciesForEveryValueAttribute(dataset);
 
-        setEntropyForValueAttributes();
+        setEntropyForValueAttributes(dataset);
 
         calculateAttributeGain();
 
+        clearTargetClassesFrequency();
+
+        priorProbabilityFirstClass = 0;
+        priorProbabilitySecondClass = 0;
     }
 
     Attribute getMaximumInformationGain(List<Attribute> attributes) {
@@ -73,6 +79,16 @@ public class DecisionTreeAlgorithm {
         return bestAttribute;
     }
 
+    private void clearTargetClassesFrequency() {
+        for (Attribute atrribute : attributes) {
+            for (Map.Entry<String, ValueAttribute> mapEntry : atrribute.getValueAttributeMap().entrySet()) {
+                ValueAttribute valuteAttribute = mapEntry.getValue();
+                valuteAttribute.getTargetClassesFrequency().put(CLASS_ONE, 0d);
+                valuteAttribute.getTargetClassesFrequency().put(CLASS_TWO, 0d);
+            }
+        }
+    }
+
     private void calculateAttributeGain() {
         for (Attribute attribute : attributes) {
             Double attributeEntropy = calculateEntropyForTwoAttributes(attribute);
@@ -81,72 +97,52 @@ public class DecisionTreeAlgorithm {
         }
     }
 
-    public void calculateAttributeGainForSubset(List<Object> subset, ValueAttribute targetValueAttribute) {
-        for (Attribute attribute : attributes) {
+    private void setEntropyForValueAttributes(Object[][] dataset) {
+        for (int i = 0; i < dataset.length; i++) {
+            for (int j = 0; j < dataset[i].length - 1; j++) {
+                for (Attribute attribute : attributes) {
+                    Map<String, ValueAttribute> valueAttributeMap = attribute.getValueAttributeMap();
+                    for (Map.Entry<String, ValueAttribute> mapEntry : valueAttributeMap.entrySet()) {
+                        ValueAttribute valueAttribute = mapEntry.getValue();
+                        Double frequencyYes = valueAttribute.getTargetClassesFrequency().get(CLASS_ONE);
+                        Double frequencyNo = valueAttribute.getTargetClassesFrequency().get(CLASS_TWO);
 
-            double freq1 = targetValueAttribute.getTargetClassesFrequency().get(CLASS_ONE);
-            double freq2 = targetValueAttribute.getTargetClassesFrequency().get(CLASS_TWO);
-
-            Double attributeEntropy = calculateEntropyForTwoAttributes(targetValueAttribute);
-            Double targetClassEntropy = calculateEntropyForOneAttribute(freq1, freq2);
-
-            attribute.setGain(targetClassEntropy - attributeEntropy);
-
-        }
-
-    }
-
-    private void setEntropyForValueAttributes() {
-        for (int i = 1; i < data.length; i++) {
-            for (int j = 0; j < data[i].length - 1; j++) {
-                Map<String, ValueAttribute> valueAttributeMap = attributes.get(j).getValueAttributeMap();
-                for (Map.Entry<String, ValueAttribute> mapEntry : valueAttributeMap.entrySet()) {
-                    ValueAttribute valueAttribute = mapEntry.getValue();
-                    Double frequencyYes = valueAttribute.getTargetClassesFrequency().get(CLASS_ONE);
-                    Double frequencyNo = valueAttribute.getTargetClassesFrequency().get(CLASS_TWO);
-
-                    Double entropy = calculateEntropyForOneAttribute(frequencyNo, frequencyYes);
-                    valueAttribute.setEntropy(entropy);
+                        Double entropy = calculateEntropyForOneAttribute(frequencyNo, frequencyYes);
+                        valueAttribute.setEntropy(entropy);
+                    }
                 }
             }
         }
     }
 
-    private void setTargetClassFrequenciesForEveryValueAttribute() {
+    private void setTargetClassFrequenciesForEveryValueAttribute(Object[][] dataset) {
         // Calculate frequency for every valueAttribute for every class
-        for (int i = 1; i < data.length; i++) {
-            for (int j = 0; j < data[i].length - 1; j++) {
-                ValueAttribute valueAttribute = attributes.get(j).getValueAttributeMap().get(data[i][j].toString());
-                if (data[i][TARGET_CLASS].equals(CLASS_ONE)) {
-                    valueAttribute.getTargetClassesFrequency().put(CLASS_ONE, valueAttribute.getTargetClassesFrequency().get(CLASS_ONE) + 1d);
-                } else {
-                    valueAttribute.getTargetClassesFrequency().put(CLASS_TWO, valueAttribute.getTargetClassesFrequency().get(CLASS_TWO) + 1d);
+        for (int i = 0; i < dataset.length; i++) {
+            for (int j = 0; j < dataset[i].length - 1; j++) {
+                for (Attribute attribute : attributes) {
+                    ValueAttribute valueAttribute = attribute.getValueAttributeMap().get(dataset[i][j].toString());
+                    if (valueAttribute != null) {
+                        if (dataset[i][TARGET_CLASS].equals(CLASS_ONE)) {
+                            valueAttribute.getTargetClassesFrequency().put(CLASS_ONE, valueAttribute.getTargetClassesFrequency().get(CLASS_ONE) + 1d);
+                        } else {
+                            valueAttribute.getTargetClassesFrequency().put(CLASS_TWO, valueAttribute.getTargetClassesFrequency().get(CLASS_TWO) + 1d);
+                        }
+                    }
                 }
             }
         }
     }
 
-    private void setTargetClassFrequenciesForEveryValueAttribute(Object[][] subset) {
-        for (int i = 1; i < subset.length; i++) {
-            for (int j = 0; j < subset[i].length - 1; j++) {
-                // Calculate frequencies for subset
-
-
-            }
-        }
-    }
-
-    public Object[][] getSubsetForValueAttribute(ValueAttribute valueAttribute) {
-        Object[][] subset = new Object[(int) valueAttribute.getFrequency()][data[0].length];
+    public Object[][] getSubsetForValueAttribute(ValueAttribute valueAttribute, Object[][] dataset) {
+        Object[][] subset = new Object[(int) valueAttribute.getFrequency()][dataset[0].length];
         int index = 0;
-        for (int i = 1; i < data.length; i++) {
-            for (int j = 0; j < data[i].length - 1; j++) {
-                if (data[i][j].equals(valueAttribute.getName())) {
-                    subset[index++] = data[i];
+        for (int i = 0; i < dataset.length; i++) {
+            for (int j = 0; j < dataset[i].length; j++) {
+                if (dataset[i][j].equals(valueAttribute.getName())) {
+                    subset[index++] = dataset[i];
                 }
             }
         }
-        setTargetClassFrequenciesForEveryValueAttribute(subset);
         return subset;
     }
 
@@ -157,22 +153,25 @@ public class DecisionTreeAlgorithm {
             //Foreach valueAttribute in valueAttributeMap
             for (Map.Entry<String, ValueAttribute> mapEntry : attribute.getValueAttributeMap().entrySet()) {
                 //Set Frequency valueAttribute
-                int frequency = calculateFrequency.get(mapEntry.getKey());
+                int frequency = 0;
+                if (calculateFrequency.containsKey(mapEntry.getKey())) {
+                    frequency = calculateFrequency.get(mapEntry.getKey());
+                }
                 mapEntry.getValue().setFrequency(frequency);
             }
         }
     }
 
-    private void setValueAttributesForAttributes() {
+    private void setValueAttributesForAttributes(Object[][] dataset) {
         // Skip attributes from dataset
         // Set all valueAttributes in valueAttributeMap
-        for (int i = 1; i < data.length; i++) {
+        for (int i = 0; i < dataset.length; i++) {
             for (int j = 0; j < attributes.size(); j++) {
                 if (i != TARGET_CLASS) {
                     ValueAttribute valueAttribute = new ValueAttribute();
                     Attribute attribute = attributes.get(j);
 
-                    valueAttribute.setName(data[i][j].toString());
+                    valueAttribute.setName(dataset[i][j].toString());
                     valueAttribute.getTargetClassesFrequency().put(CLASS_ONE, 0d);
                     valueAttribute.getTargetClassesFrequency().put(CLASS_TWO, 0d);
                     attribute.getValueAttributeMap().put(valueAttribute.getName(), valueAttribute);
@@ -182,19 +181,6 @@ public class DecisionTreeAlgorithm {
         }
     }
 
-    private void setAllAttributes() {
-        //Collect all attributes from data
-        List<Object> attributesFromData = Arrays.asList(data[0]);
-
-        for (int i = 0; i < attributesFromData.size(); i++) {
-            if (i != TARGET_CLASS) {
-                Attribute attribute = new Attribute();
-                attribute.setName(attributesFromData.get(i).toString());
-                attributes.add(attribute);
-            }
-        }
-
-    }
 
     private double calculateEntropyForOneAttribute(double frequencyOne, double frequencyTwo) {
         double entropy = 0;
@@ -220,20 +206,12 @@ public class DecisionTreeAlgorithm {
         return entropy;
     }
 
-    private double calculateEntropyForTwoAttributes(ValueAttribute valueAttribute) {
-        double entropy = 0;
-
-        entropy += (valueAttribute.getFrequency() / priorProbabilityAll) * valueAttribute.getEntropy();
-
-        return entropy;
-    }
-
-    private void calculatePriorProbability(Object[][] array, int columnIndex) {
+    private void calculatePriorProbability(Object[][] dataset, int columnIndex) {
         // Calculate prior probability
-        for (int i = 1; i < array.length; i++) {
-            if (CLASS_ONE.equals(array[i][columnIndex])) {
+        for (int i = 0; i < dataset.length; i++) {
+            if (CLASS_ONE.equals(dataset[i][columnIndex])) {
                 priorProbabilityFirstClass += 1;
-            } else if (CLASS_TWO.equals(array[i][columnIndex])) {
+            } else if (CLASS_TWO.equals(dataset[i][columnIndex])) {
                 priorProbabilitySecondClass += 1;
             }
         }
@@ -242,4 +220,21 @@ public class DecisionTreeAlgorithm {
     public List<Attribute> getAttributes() {
         return attributes;
     }
+
+
+    private Object[][] setAllAttributes(Object[][] dataset) {
+        //Collect all attributes from dataset
+        List<Object> attributesFromData = Arrays.asList(dataset[0]);
+
+        for (int i = 0; i < attributesFromData.size(); i++) {
+            if (i != TARGET_CLASS) {
+                Attribute attribute = new Attribute();
+                attribute.setName(attributesFromData.get(i).toString());
+                attributes.add(attribute);
+            }
+        }
+        // Remove attributes from dataset
+        return ArrayUtils.removeElement(dataset, dataset[0]);
+    }
+
 }

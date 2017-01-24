@@ -3,10 +3,12 @@ package decisiontree;
 import util.DataReader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class Tree {
+    private static final int TARGET_CLASS = 4;
     private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
     private List<Attribute> attributes = new ArrayList<>();
     private TreeNode root = new TreeNode();
@@ -48,12 +50,46 @@ public class Tree {
     }
 
     private void init() {
+        double correct = 0;
         Object[][] dataset = dataReader.getData();
+        Object[][] trainingData = dataReader.createTrainingDataSet();
+
 
         decisionTreeAlgorithm.init(dataset);
         attributes = decisionTreeAlgorithm.getAttributes();
 
         buildDecisionTree(root, dataset);
+        root.printTree();
+
+        for (int i = 1; i < dataset.length; i++) {
+            Object indexedClass = classify(Arrays.asList(dataset[i]));
+
+            if (indexedClass.equals(dataset[i][TARGET_CLASS])) {
+                correct++;
+            }
+        }
+        System.out.println("Accuracy: " + (correct / (dataset.length - 1)));
+    }
+
+    private Object classify(List<Object> features) {
+        Object targetClass = null;
+        TreeNode treeNode = null;
+
+        for (Object feature : features) {
+            if (root.getChildren().containsKey(feature.toString())) {
+                treeNode = root.getChildren().get(feature.toString());
+            } else {
+                if (treeNode.isLeaf()) {
+                    return treeNode.getTargetClass();
+                } else {
+                    if (treeNode.getChildren().containsKey(feature.toString())) {
+                        return treeNode.getChildren().get(feature.toString()).getTargetClass();
+                    }
+                }
+            }
+        }
+
+        return targetClass;
     }
 
     private void buildDecisionTree(TreeNode currentNode, Object[][] dataset) {
@@ -76,6 +112,8 @@ public class Tree {
                 TreeNode leafNode = new TreeNode();
                 leafNode.setLabel(currentValueAttributeName);
                 leafNode.setLeaf(true);
+                leafNode.setTargetClass(decisionTreeAlgorithm.getTargetClassForLeaf(currentValueAttribute, dataset));
+
                 currentNode.getChildren().put(currentValueAttributeName, leafNode);
             } else {
                 Object[][] subset = decisionTreeAlgorithm.getSubsetForValueAttribute(currentValueAttribute, dataset);

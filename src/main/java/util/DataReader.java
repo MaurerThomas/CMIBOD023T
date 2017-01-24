@@ -2,7 +2,10 @@ package util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashSet;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +51,23 @@ public class DataReader {
 
     public Object[][] getData() {
         return data;
+    }
+
+    public Object[][] createTrainingDataSet() {
+        int trainingDataSetSize = data.length / 3;
+        Set<Object[]> subset = new HashSet<>(trainingDataSetSize);
+        Random random = new Random();
+
+        for (int i = 0; i < trainingDataSetSize; i++) {
+            int index = random.nextInt(data.length);
+            Object[] mushroom = data[index];
+            while (subset.contains(mushroom)) {
+                index = (index + 1) % data.length;
+                mushroom = data[index];
+            }
+            subset.add(mushroom);
+        }
+        return subset.toArray(new Object[subset.size()][]);
     }
 
 }

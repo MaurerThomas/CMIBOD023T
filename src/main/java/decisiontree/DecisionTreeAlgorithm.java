@@ -162,6 +162,23 @@ public class DecisionTreeAlgorithm {
         }
     }
 
+    public String getTargetClassForLeaf(ValueAttribute valueAttribute, Object[][] dataset) {
+        for (int i = 0; i < dataset.length; i++) {
+            for (int j = 0; j < dataset[i].length; j++) {
+                if (dataset[i][j].equals(valueAttribute.getName())) {
+                    if (dataset[i][TARGET_CLASS].equals(CLASS_ONE)) {
+                        return CLASS_ONE;
+                    } else {
+                        return CLASS_TWO;
+                    }
+                }
+
+            }
+        }
+
+        return null;
+    }
+
     private void setValueAttributesForAttributes(Object[][] dataset) {
         // Skip attributes from dataset
         // Set all valueAttributes in valueAttributeMap

@@ -2,7 +2,10 @@ package bayesian;
 
 import util.DataReader;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.lang.Math.log;
 
@@ -29,7 +32,7 @@ public class Bayesian {
     private void init() {
         double correct = 0;
         Object[][] data = dataReader.getData();
-        Object[][] trainingData = createTrainingDataSet(data);
+        Object[][] trainingData = dataReader.createTrainingDataSet();
         priorProbabilityAll = (double) trainingData.length;
         trainDataset(trainingData, TARGET_CLASS);
 
@@ -43,22 +46,7 @@ public class Bayesian {
         System.out.println("Accuracy: " + (correct / data.length));
     }
 
-    private Object[][] createTrainingDataSet(Object[][] data) {
-        int trainingDataSetSize = data.length / 3;
-        Set<Object[]> subset = new HashSet<>(trainingDataSetSize);
-        Random random = new Random();
 
-        for (int i = 0; i < trainingDataSetSize; i++) {
-            int index = random.nextInt(data.length);
-            Object[] mushroom = data[index];
-            while (subset.contains(mushroom)) {
-                index = (index + 1) % data.length;
-                mushroom = data[index];
-            }
-            subset.add(mushroom);
-        }
-        return subset.toArray(new Object[subset.size()][]);
-    }
 
     private Map<Object, Map<Integer, Map<Object, Double>>> trainDataset(Object[][] trainingData, int targetColumn) {
         initPossibleClasses(trainingData, targetColumn);

@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DecisionTreeAlgorithm {
-    private static final int TARGET_CLASS = 4;
-    private static final String CLASS_ONE = "Yes";
-    private static final String CLASS_TWO = "No";
+    private static final int TARGET_CLASS = 0;
+    private static final String CLASS_ONE = "p";
+    private static final String CLASS_TWO = "e";
     private static final double LN2 = Math.log(2);
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;

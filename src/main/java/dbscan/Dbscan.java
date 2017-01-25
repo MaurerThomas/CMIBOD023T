@@ -1,16 +1,26 @@
 package dbscan;
 
+import org.jzy3d.analysis.AbstractAnalysis;
+import org.jzy3d.analysis.AnalysisLauncher;
+import org.jzy3d.chart.factories.AWTChartComponentFactory;
+import org.jzy3d.colors.ColorMapper;
+import org.jzy3d.colors.colormaps.ColorMapRainbow;
+import org.jzy3d.maths.Coord3d;
+import org.jzy3d.plot3d.primitives.ScatterMultiColor;
+import org.jzy3d.plot3d.rendering.canvas.Quality;
+import util.DataReader;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Dbscan {
-    private static final int MIN_POINTS = 4;
-    private static final double EPSILON = 7.00;
+    private static final int MIN_POINTS = 10;
+    private static final double EPSILON = 0.01;
     private List<Point> points = new ArrayList<>();
     private List<Cluster> clusters = new ArrayList<>();
+    private DataReader dataReader = new DataReader();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Dbscan dbscan = new Dbscan();
         dbscan.init();
     }
@@ -38,19 +48,11 @@ public class Dbscan {
 //          add P' to cluster C
 //
 
-    private void init() {
-        points.add(new Point(Arrays.asList(0d, 0d, 0d)));
-        points.add(new Point(Arrays.asList(5d, 1d, 0d)));
-        points.add(new Point(Arrays.asList(3d, 2d, 0d)));
-        points.add(new Point(Arrays.asList(10d, 0d, 0d)));
-        points.add(new Point(Arrays.asList(12d, 3d, 0d)));
-        points.add(new Point(Arrays.asList(30d, 15d, 0d)));
-        points.add(new Point(Arrays.asList(25d, 20d, 0d)));
-        points.add(new Point(Arrays.asList(250d, 200d, 0d)));
-        points.add(new Point(Arrays.asList(249d, 200d, 0d)));
-        points.add(new Point(Arrays.asList(248d, 201d, 0d)));
-        points.add(new Point(Arrays.asList(247d, 202d, 0d)));
+    private void init() throws Exception {
+        points = dataReader.parseStars();
+
         startCluster();
+        draw();
         clusters.forEach(Cluster::plotCluster);
     }
 
@@ -114,4 +116,27 @@ public class Dbscan {
 
         return false;
     }
+
+    private void draw() throws Exception {
+        Coord3d[] coord3dsPoints = new Coord3d[points.size()];
+        //Color[] colors = new Color[points.size()];
+        //float a;
+        for (int i = 0; i < coord3dsPoints.length; i++) {
+            Point star = points.get(i);
+            coord3dsPoints[i] = new Coord3d(star.getProperties().get(0), star.getProperties().get(1), star.getProperties().get(2));
+            //a = 0.25f;
+            //colors[i] = new Color(star.getProperties().get(0),star.getProperties().get(1), star.getProperties().get(2), a);
+        }
+        //Scatter scatter = new Scatter(coord3dsPoints, colors);
+
+        ScatterMultiColor scatter = new ScatterMultiColor(coord3dsPoints, new ColorMapper(new ColorMapRainbow(), -0.5f, 0.5f));
+        AnalysisLauncher.open(new AbstractAnalysis() {
+            @Override
+            public void init() throws Exception {
+                chart = AWTChartComponentFactory.chart(Quality.Fastest);
+                chart.getScene().add(scatter);
+            }
+        });
+    }
+
 }

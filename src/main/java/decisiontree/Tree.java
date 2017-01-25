@@ -3,16 +3,15 @@ package decisiontree;
 import util.DataReader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class Tree {
-    private static final int TARGET_CLASS = 4;
+    private static final int TARGET_CLASS = 0;
     private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
     private List<Attribute> attributes = new ArrayList<>();
     private TreeNode root = new TreeNode();
-    private DataReader dataReader = new DataReader(15, 5);
+    private DataReader dataReader = new DataReader(8125, 22);
 
     //    Begin
 
@@ -59,16 +58,16 @@ public class Tree {
         attributes = decisionTreeAlgorithm.getAttributes();
 
         buildDecisionTree(root, dataset);
-        root.printTree();
+        // root.printTree();
 
-        for (int i = 1; i < dataset.length; i++) {
-            Object indexedClass = classify(Arrays.asList(dataset[i]));
-
-            if (indexedClass.equals(dataset[i][TARGET_CLASS])) {
-                correct++;
-            }
-        }
-        System.out.println("Accuracy: " + (correct / (dataset.length - 1)));
+//        for (int i = 1; i < dataset.length; i++) {
+//            Object indexedClass = classify(Arrays.asList(dataset[i]));
+//
+//            if (indexedClass.equals(dataset[i][TARGET_CLASS])) {
+//                correct++;
+//            }
+//        }
+//        System.out.println("Accuracy: " + (correct / (dataset.length - 1)));
     }
 
     private Object classify(List<Object> features) {

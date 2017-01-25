@@ -1,16 +1,15 @@
 package util;
 
+import dbscan.Point;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataReader {
-    private static File file = new File("data.csv");
+    private static File file = new File("stars.csv");
     private Object[][] data;
 
     public DataReader(int rowSize, int columnSize) {
@@ -26,6 +25,9 @@ public class DataReader {
             Logger logger = Logger.getLogger("myLogger");
             logger.log(Level.SEVERE, "Could not find the file: ", e);
         }
+    }
+
+    public DataReader() {
     }
 
     private static void printRow(Object[] row) {
@@ -47,6 +49,20 @@ public class DataReader {
             data[index++] = line.split(delimiter);
         }
         sc.close();
+    }
+
+    public List<Point> parseStars() throws FileNotFoundException {
+        List<Point> stars = new ArrayList<>();
+
+        try (Scanner sc = new Scanner(file)) {
+            sc.nextLine();
+            while (sc.hasNextLine()) {
+                String[] values = sc.nextLine().split(",");
+                stars.add(new Point(Arrays.asList(Double.parseDouble(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]))));
+            }
+
+        }
+        return stars;
     }
 
     public Object[][] getData() {

@@ -3,19 +3,18 @@ package dbscan;
 import org.jzy3d.analysis.AbstractAnalysis;
 import org.jzy3d.analysis.AnalysisLauncher;
 import org.jzy3d.chart.factories.AWTChartComponentFactory;
-import org.jzy3d.colors.ColorMapper;
-import org.jzy3d.colors.colormaps.ColorMapRainbow;
+import org.jzy3d.colors.Color;
 import org.jzy3d.maths.Coord3d;
-import org.jzy3d.plot3d.primitives.ScatterMultiColor;
+import org.jzy3d.plot3d.primitives.Scatter;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import util.DataReader;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Dbscan {
     private static final int MIN_POINTS = 10;
-    private static final double EPSILON = 0.01;
+    private static final double EPSILON = 0.1;
+    private static final long SEED = 0;
     private List<Point> points = new ArrayList<>();
     private List<Cluster> clusters = new ArrayList<>();
     private DataReader dataReader = new DataReader();
@@ -53,7 +52,7 @@ public class Dbscan {
 
         startCluster();
         draw();
-        clusters.forEach(Cluster::plotCluster);
+        //clusters.forEach(Cluster::plotCluster);
     }
 
     private void startCluster() {
@@ -67,6 +66,8 @@ public class Dbscan {
                     point.setVisited(false);
                 } else {
                     Cluster cluster = new Cluster(clusterIndex);
+                    point.setClusterIndex(clusterIndex);
+                    point.setCluster(cluster);
                     expandCluster(point, neighbours, cluster);
                     clusters.add(cluster);
                     clusterIndex++;
@@ -88,8 +89,10 @@ public class Dbscan {
                     neighbours.addAll(newNeighbourPoints);
                 }
             }
-            if (!cluster.getPoints().contains(p)) {
+            if (p.getCluster() == null) {
                 cluster.addPoint(p);
+                p.setCluster(cluster);
+                p.setClusterIndex(cluster.getId());
             }
         }
 
@@ -107,29 +110,17 @@ public class Dbscan {
         return neighbours;
     }
 
-    private boolean pointAlreadyAssignedToCluster(Point point) {
-        for (Cluster cluster : clusters) {
-            if (cluster.getPoints().contains(point)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void draw() throws Exception {
         Coord3d[] coord3dsPoints = new Coord3d[points.size()];
-        //Color[] colors = new Color[points.size()];
-        //float a;
+        Color[] colors = new Color[points.size()];
+        Map<Cluster, Color> colorMap = getColors();
+
         for (int i = 0; i < coord3dsPoints.length; i++) {
             Point star = points.get(i);
             coord3dsPoints[i] = new Coord3d(star.getProperties().get(0), star.getProperties().get(1), star.getProperties().get(2));
-            //a = 0.25f;
-            //colors[i] = new Color(star.getProperties().get(0),star.getProperties().get(1), star.getProperties().get(2), a);
+            colors[i] = colorMap.get(star.getCluster());
         }
-        //Scatter scatter = new Scatter(coord3dsPoints, colors);
-
-        ScatterMultiColor scatter = new ScatterMultiColor(coord3dsPoints, new ColorMapper(new ColorMapRainbow(), -0.5f, 0.5f));
+        Scatter scatter = new Scatter(coord3dsPoints, colors);
         AnalysisLauncher.open(new AbstractAnalysis() {
             @Override
             public void init() throws Exception {
@@ -137,6 +128,19 @@ public class Dbscan {
                 chart.getScene().add(scatter);
             }
         });
+    }
+
+    private Map<Cluster, Color> getColors() {
+        Map<Cluster, Color> colorMap = new HashMap<>();
+        colorMap.put(null, new Color(0, 0, 0));
+        Random random = new Random(SEED);
+        for (Cluster cluster : clusters) {
+            float r = random.nextFloat();
+            float g = random.nextFloat();
+            float b = random.nextFloat();
+            colorMap.put(cluster, new Color(r, g, b));
+        }
+        return colorMap;
     }
 
 }

@@ -3,15 +3,17 @@ package decisiontree;
 import util.DataReader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static decisiontree.DecisionTreeAlgorithm.getTargetClass;
+
 public class Tree {
-    private static final int TARGET_CLASS = 0;
     private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
     private List<Attribute> attributes = new ArrayList<>();
     private TreeNode root = new TreeNode();
-    private DataReader dataReader = new DataReader(8125, 22);
+    private DataReader dataReader = new DataReader();
 
     //    Begin
 
@@ -53,42 +55,39 @@ public class Tree {
         Object[][] dataset = dataReader.getData();
         Object[][] trainingData = dataReader.createTrainingDataSet();
 
-
-        decisionTreeAlgorithm.init(dataset);
+        decisionTreeAlgorithm.init(trainingData, dataReader.getHeader());
         attributes = decisionTreeAlgorithm.getAttributes();
 
-        buildDecisionTree(root, dataset);
-        // root.printTree();
+        buildDecisionTree(root, trainingData);
+        //root.printTree();
 
-//        for (int i = 1; i < dataset.length; i++) {
-//            Object indexedClass = classify(Arrays.asList(dataset[i]));
-//
-//            if (indexedClass.equals(dataset[i][TARGET_CLASS])) {
-//                correct++;
-//            }
-//        }
-//        System.out.println("Accuracy: " + (correct / (dataset.length - 1)));
-    }
-
-    private Object classify(List<Object> features) {
-        Object targetClass = null;
-        TreeNode treeNode = null;
-
-        for (Object feature : features) {
-            if (root.getChildren().containsKey(feature.toString())) {
-                treeNode = root.getChildren().get(feature.toString());
-            } else {
-                if (treeNode.isLeaf()) {
-                    return treeNode.getTargetClass();
-                } else {
-                    if (treeNode.getChildren().containsKey(feature.toString())) {
-                        return treeNode.getChildren().get(feature.toString()).getTargetClass();
-                    }
+        for (int i = 1; i < dataset.length; i++) {
+            Object indexedClass = classify(Arrays.asList(dataset[i]), dataReader.getHeader());
+            if (indexedClass != null) {
+                if (indexedClass.equals(dataset[i][getTargetClass()])) {
+                    correct++;
                 }
             }
         }
+        System.out.println("Accuracy: " + (correct / (dataset.length - 1)));
+    }
 
-        return targetClass;
+    private Object classify(List<Object> features, List<String> header) {
+        TreeNode treeNode = root;
+        while (treeNode != null) {
+            if (treeNode.isLeaf()) {
+                return treeNode.getTargetClass();
+            }
+            int index = header.indexOf(treeNode.getLabel());
+            if (index < 0) {
+                throw new IllegalArgumentException(treeNode.getLabel() + " not found");
+
+            }
+            Object feature = features.get(index);
+            treeNode = treeNode.getChildren().get(feature.toString());
+
+        }
+        throw new NullPointerException("Cannot classify tree. Need more data");
     }
 
     private void buildDecisionTree(TreeNode currentNode, Object[][] dataset) {
@@ -112,12 +111,10 @@ public class Tree {
                 leafNode.setLabel(currentValueAttributeName);
                 leafNode.setLeaf(true);
                 leafNode.setTargetClass(decisionTreeAlgorithm.getTargetClassForLeaf(currentValueAttribute, dataset));
-
                 currentNode.getChildren().put(currentValueAttributeName, leafNode);
             } else {
                 Object[][] subset = decisionTreeAlgorithm.getSubsetForValueAttribute(currentValueAttribute, dataset);
-                decisionTreeAlgorithm.init(subset);
-
+                decisionTreeAlgorithm.init(subset, dataReader.getHeader());
                 TreeNode newNode = new TreeNode();
                 currentNode.getChildren().put(currentValueAttributeName, newNode);
                 // Subset meegeven

@@ -2,53 +2,40 @@ package util;
 
 import dbscan.Point;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataReader {
-    private static File file = new File("stars.csv");
+    private static final long SEED = 1;
+    private static File file = new File("mushrooms.csv");
     private Object[][] data;
+    private List<String> header;
 
-    public DataReader(int rowSize, int columnSize) {
-        data = new Object[rowSize][columnSize];
-
+    public DataReader() {
         try {
-            readMyData();
-
-//            for (Object[] row : data) {
-//                printRow(row);
-//            }
-        } catch (FileNotFoundException e) {
+            readData();
+        } catch (IOException e) {
             Logger logger = Logger.getLogger("myLogger");
             logger.log(Level.SEVERE, "Could not find the file: ", e);
         }
     }
 
-    public DataReader() {
-    }
-
-    private static void printRow(Object[] row) {
-        for (Object i : row) {
-            System.out.format("%15s", i);
-        }
-        System.out.println();
-    }
-
-    private void readMyData() throws FileNotFoundException {
+    private void readData() throws IOException {
         String delimiter = ",";
-        Scanner sc = new Scanner(file);
-        int index = 0;
+        String line;
+        BufferedReader r = new BufferedReader(new FileReader(file));
+        List<String[]> list = new ArrayList<>();
+        header = Arrays.asList(r.readLine().split(delimiter));
 
-        //sc.nextLine();
-        while (sc.hasNextLine()) {
+        while ((line = r.readLine()) != null)
+            list.add(line.split(delimiter));
 
-            String line = sc.nextLine();
-            data[index++] = line.split(delimiter);
-        }
-        sc.close();
+        data = new Object[list.size()][];
+        list.toArray(data);
+
+        r.close();
     }
 
     public List<Point> parseStars() throws FileNotFoundException {
@@ -84,6 +71,10 @@ public class DataReader {
             subset.add(mushroom);
         }
         return subset.toArray(new Object[subset.size()][]);
+    }
+
+    public List<String> getHeader() {
+        return header;
     }
 
 }

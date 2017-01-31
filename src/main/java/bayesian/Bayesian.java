@@ -13,11 +13,10 @@ public class Bayesian {
     private static final int TARGET_CLASS = 4;
     private static final String CLASS_ONE = "Yes";
     private static final String CLASS_TWO = "No";
-    private static final long SEED = 1;
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private double priorProbabilityAll = 0;
-    private DataReader dataReader = new DataReader(14, 5);
+    private DataReader dataReader = new DataReader();
     private Map<Object, Map<Integer, Map<Object, Double>>> targetClassesWithConditionalProbabilities = new HashMap<>();
 
     private Bayesian() {

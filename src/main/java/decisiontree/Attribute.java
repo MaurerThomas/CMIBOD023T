@@ -21,10 +21,6 @@ public class Attribute {
         return valueAttributeMap;
     }
 
-    public void setValueAttributeMap(Map<String, ValueAttribute> valueAttributeMap) {
-        this.valueAttributeMap = valueAttributeMap;
-    }
-
     public double getGain() {
         return gain;
     }

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ValueAttribute {
-
     private String name;
     private double entropy;
     private double frequency;
@@ -38,7 +37,4 @@ public class ValueAttribute {
         return targetClassesFrequency;
     }
 
-    public void setTargetClassesFrequency(Map<String, Double> targetClassesFrequency) {
-        this.targetClassesFrequency = targetClassesFrequency;
-    }
 }

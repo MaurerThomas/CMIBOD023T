@@ -10,9 +10,9 @@ import java.util.Map;
 import static java.lang.Math.log;
 
 public class Bayesian {
-    private static final int TARGET_CLASS = 4;
-    private static final String CLASS_ONE = "Yes";
-    private static final String CLASS_TWO = "No";
+    private static final int TARGET_CLASS = 0;
+    private static final String CLASS_ONE = "e";
+    private static final String CLASS_TWO = "p";
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private double priorProbabilityAll = 0;

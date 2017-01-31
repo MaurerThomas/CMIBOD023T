@@ -8,8 +8,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataReader {
-    private static final long SEED = 1;
-    private static File file = new File("mushrooms.csv");
+    private static final long SEED = 919460196;
+    private static File file = new File("stars.csv");
     private Object[][] data;
     private List<String> header;
 

@@ -1,6 +1,7 @@
 package decisiontree;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TreeNode extends Node {
@@ -13,8 +14,7 @@ public class TreeNode extends Node {
         return children;
     }
 
-    public void printTree() {
-        System.out.println(this.getLabel());
+    public void printTree(List<String> header) {
         for (Map.Entry<String, TreeNode> mapEntry : children.entrySet()) {
             String nodeName = mapEntry.getKey();
             TreeNode node = mapEntry.getValue();
@@ -24,7 +24,7 @@ public class TreeNode extends Node {
                 System.out.println("\t" + mapEntry.getKey() + " - " + mapEntry.getValue().getTargetClass());
             } else {
                 System.out.println("\t" + nodeName);
-                System.out.println("\t\t" + node.getLabel());
+                System.out.println("\t\t" + header.get(node.getIndex()));
             }
 
             for (Map.Entry<String, TreeNode> nodeMapEntry : node.getChildren().entrySet()) {

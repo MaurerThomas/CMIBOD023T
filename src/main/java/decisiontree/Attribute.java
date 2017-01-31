@@ -1,23 +1,23 @@
 package decisiontree;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Attribute {
 
-    private String name;
-    private Map<String, ValueAttribute> valueAttributeMap = new HashMap<>();
+    private int index;
+    private Set<ValueAttribute> valueAttributeMap = new HashSet<>();
     private double gain;
 
-    public String getName() {
-        return name;
+    public int getIndex() {
+        return index;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setIndex(int name) {
+        this.index = name;
     }
 
-    public Map<String, ValueAttribute> getValueAttributeMap() {
+    public Set<ValueAttribute> getValueAttributeSet() {
         return valueAttributeMap;
     }
 

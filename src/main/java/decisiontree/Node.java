@@ -2,7 +2,7 @@ package decisiontree;
 
 public abstract class Node {
     private boolean isLeaf;
-    private String label;
+    private int index;
     private String targetClass;
 
     public boolean isLeaf() {
@@ -13,12 +13,12 @@ public abstract class Node {
         isLeaf = leaf;
     }
 
-    public String getLabel() {
-        return label;
+    public int getIndex() {
+        return index;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
+    public void setIndex(int label) {
+        this.index = label;
     }
 
     public String getTargetClass() {

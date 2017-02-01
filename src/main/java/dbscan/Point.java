@@ -3,11 +3,11 @@ package dbscan;
 import java.util.List;
 
 public class Point {
-    private static EuclideanDistance euclideanDistance = new EuclideanDistance();
+    private static final EuclideanDistance euclideanDistance = new EuclideanDistance();
+    private final List<Double> properties;
     private boolean visited = false;
     private int clusterIndex;
     private Cluster cluster;
-    private List<Double> properties;
 
     public Point(List<Double> properties) {
         this.properties = properties;
@@ -28,10 +28,6 @@ public class Point {
 
     public List<Double> getProperties() {
         return properties;
-    }
-
-    public int getClusterIndex() {
-        return clusterIndex;
     }
 
     public void setClusterIndex(int clusterIndex) {

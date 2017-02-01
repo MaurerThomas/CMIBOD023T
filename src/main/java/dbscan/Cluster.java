@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cluster {
+    private final int id;
     private List<Point> points;
-    private int id;
 
     public Cluster(int id) {
         this.points = new ArrayList<>();
@@ -16,18 +16,6 @@ public class Cluster {
         points.add(point);
     }
 
-    public List<Point> getPoints() {
-        return points;
-    }
-
-    public void setPoints(List<Point> points) {
-        this.points = points;
-    }
-
-    public void clearPoints() {
-        this.points.clear();
-    }
-
     public int getId() {
         return id;
     }
@@ -35,9 +23,7 @@ public class Cluster {
     public void plotCluster() {
         System.out.println("[Cluster: " + id + "]");
         System.out.println("[Points:");
-        for (Point p : points) {
-            System.out.println(p);
-        }
+        points.forEach(System.out::println);
         System.out.println("]  \n");
     }
 }

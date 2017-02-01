@@ -25,7 +25,7 @@ class DecisionTreeAlgorithm {
     void init(Object[][] dataset, List<Attribute> attributes) {
         priorProbabilityAll = (double) dataset.length;
 
-        calculatePriorProbability(dataset, TARGET_CLASS);
+        calculatePriorProbability(dataset);
 
         setValueAttributesForAttributes(dataset, attributes);
 
@@ -39,12 +39,12 @@ class DecisionTreeAlgorithm {
         priorProbabilitySecondClass = 0;
     }
 
-    private void calculatePriorProbability(Object[][] dataset, int columnIndex) {
+    private void calculatePriorProbability(Object[][] dataset) {
         // Calculate prior probability
-        for (int i = 0; i < dataset.length; i++) {
-            if (CLASS_ONE.equals(dataset[i][columnIndex])) {
+        for (Object[] row : dataset) {
+            if (CLASS_ONE.equals(row[TARGET_CLASS])) {
                 priorProbabilityFirstClass += 1;
-            } else if (CLASS_TWO.equals(dataset[i][columnIndex])) {
+            } else if (CLASS_TWO.equals(row[TARGET_CLASS])) {
                 priorProbabilitySecondClass += 1;
             }
         }
@@ -93,7 +93,6 @@ class DecisionTreeAlgorithm {
     }
 
     private void setEntropyForValueAttributes(List<Attribute> attributes) {
-
         for (Attribute attribute : attributes) {
             for (ValueAttribute valueAttribute : attribute.getValueAttributeSet()) {
                 Integer frequencyYes = valueAttribute.getTargetClassesFrequency().get(CLASS_ONE);
@@ -103,7 +102,6 @@ class DecisionTreeAlgorithm {
                 valueAttribute.setEntropy(entropy);
             }
         }
-
     }
 
     private void calculateAttributeGain(List<Attribute> attributes) {
@@ -160,9 +158,9 @@ class DecisionTreeAlgorithm {
     Object[][] getSubsetForValueAttribute(ValueAttribute valueAttribute, Object[][] dataset) {
         Object[][] subset;
         List<Object[]> list = new ArrayList<>();
-        for (int i = 0; i < dataset.length; i++) {
-            if (dataset[i][valueAttribute.getIndex()].equals(valueAttribute.getName())) {
-                list.add(dataset[i]);
+        for (Object[] row : dataset) {
+            if (row[valueAttribute.getIndex()].equals(valueAttribute.getName())) {
+                list.add(row);
             }
         }
         subset = new Object[list.size()][];
@@ -172,9 +170,9 @@ class DecisionTreeAlgorithm {
     }
 
     String getTargetClassForLeaf(ValueAttribute valueAttribute, Object[][] dataset) {
-        for (int i = 0; i < dataset.length; i++) {
-            if (dataset[i][valueAttribute.getIndex()].equals(valueAttribute.getName())) {
-                return dataset[i][TARGET_CLASS].toString();
+        for (Object[] row : dataset) {
+            if (row[valueAttribute.getIndex()].equals(valueAttribute.getName())) {
+                return row[TARGET_CLASS].toString();
             }
         }
         return null;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TreeNode extends Node {
-    private Map<String, TreeNode> children = new HashMap<>();
+    private final Map<String, TreeNode> children = new HashMap<>();
 
     public TreeNode() {
     }
@@ -22,11 +22,9 @@ public class TreeNode extends Node {
 
         for (Map.Entry<String, TreeNode> nodeMapEntry : node.getChildren().entrySet()) {
             if (nodeMapEntry.getValue().isLeaf()) {
-                String leafName = nodeMapEntry.getKey() + " - " + nodeMapEntry.getValue().getTargetClass();
-                System.out.println(spacing + leafName);
+                System.out.println(spacing + nodeMapEntry.getKey() + " - " + nodeMapEntry.getValue().getTargetClass());
             } else {
-                headSpacing = spacing;
-                printTree(nodeMapEntry.getValue(), header, headSpacing);
+                printTree(nodeMapEntry.getValue(), header, spacing);
             }
         }
     }

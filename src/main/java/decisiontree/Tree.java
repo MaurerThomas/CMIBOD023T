@@ -9,9 +9,9 @@ import java.util.List;
 import static decisiontree.DecisionTreeAlgorithm.getTargetClass;
 
 public class Tree {
-    private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
-    private TreeNode root = new TreeNode();
-    private DataReader dataReader = new DataReader("mushrooms.csv");
+    private final DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
+    private final TreeNode root = new TreeNode();
+    private final DataReader dataReader = new DataReader("mushrooms.csv");
 
     //    Begin
 
@@ -89,8 +89,8 @@ public class Tree {
     private boolean hasMultipleTargetClasses(Object[][] dataset) {
         Object c = null;
 
-        for (int i = 0; i < dataset.length; i++) {
-            Object currentClass = dataset[i][getTargetClass()];
+        for (Object[] row : dataset) {
+            Object currentClass = row[getTargetClass()];
             if (c == null) {
                 c = currentClass;
             } else if (currentClass != c) {

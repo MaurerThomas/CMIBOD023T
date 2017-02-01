@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ValueAttribute {
+    private final Map<String, Integer> targetClassesFrequency = new HashMap<>();
     private int index;
     private double entropy;
     private int frequency;
-    private Map<String, Integer> targetClassesFrequency = new HashMap<>();
     private String name;
 
     public int getIndex() {

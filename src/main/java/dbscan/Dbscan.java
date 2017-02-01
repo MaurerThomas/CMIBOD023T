@@ -10,14 +10,15 @@ import org.jzy3d.plot3d.rendering.canvas.Quality;
 import util.DataReader;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Dbscan {
     private static final int MIN_POINTS = 10;
-    private static final double EPSILON = 0.5;
+    private static final double EPSILON = 0.1;
     private static final long SEED = 0;
+    private final List<Cluster> clusters = new ArrayList<>();
+    private final DataReader dataReader = new DataReader("stars.csv");
     private List<Point> points = new ArrayList<>();
-    private List<Cluster> clusters = new ArrayList<>();
-    private DataReader dataReader = new DataReader("stars.csv");
 
     public static void main(String[] args) throws Exception {
         Dbscan dbscan = new Dbscan();
@@ -86,11 +87,7 @@ public class Dbscan {
                 p.setVisited(true);
                 List<Point> newNeighbourPoints = getNeighbours(p);
                 if (newNeighbourPoints.size() >= MIN_POINTS) {
-                    for (Point neighbour : newNeighbourPoints) {
-                        if (neighbour.getCluster() == null || !neighbour.isVisited()) {
-                            neighbours.add(neighbour);
-                        }
-                    }
+                    neighbours.addAll(newNeighbourPoints.stream().filter(neighbour -> neighbour.getCluster() == null || !neighbour.isVisited()).collect(Collectors.toList()));
                 }
             }
             if (p.getCluster() == null) {
@@ -103,7 +100,7 @@ public class Dbscan {
     }
 
     private List<Point> getNeighbours(Point dataPoint) {
-        List<Point> neighbours = new ArrayList();
+        List<Point> neighbours = new ArrayList<>();
 
         for (Point point : points) {
             double distance = dataPoint.distance(point);

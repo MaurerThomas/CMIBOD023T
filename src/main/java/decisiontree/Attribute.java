@@ -5,8 +5,8 @@ import java.util.Set;
 
 public class Attribute {
 
+    private final Set<ValueAttribute> valueAttributeMap = new HashSet<>();
     private int index;
-    private Set<ValueAttribute> valueAttributeMap = new HashSet<>();
     private double gain;
 
     public int getIndex() {

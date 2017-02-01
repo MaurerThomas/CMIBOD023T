@@ -13,11 +13,11 @@ import java.util.*;
 
 public class Dbscan {
     private static final int MIN_POINTS = 10;
-    private static final double EPSILON = 0.1;
+    private static final double EPSILON = 0.5;
     private static final long SEED = 0;
     private List<Point> points = new ArrayList<>();
     private List<Cluster> clusters = new ArrayList<>();
-    private DataReader dataReader = new DataReader();
+    private DataReader dataReader = new DataReader("stars.csv");
 
     public static void main(String[] args) throws Exception {
         Dbscan dbscan = new Dbscan();
@@ -86,7 +86,11 @@ public class Dbscan {
                 p.setVisited(true);
                 List<Point> newNeighbourPoints = getNeighbours(p);
                 if (newNeighbourPoints.size() >= MIN_POINTS) {
-                    neighbours.addAll(newNeighbourPoints);
+                    for (Point neighbour : newNeighbourPoints) {
+                        if (neighbour.getCluster() == null || !neighbour.isVisited()) {
+                            neighbours.add(neighbour);
+                        }
+                    }
                 }
             }
             if (p.getCluster() == null) {

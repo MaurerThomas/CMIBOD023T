@@ -14,26 +14,20 @@ public class TreeNode extends Node {
         return children;
     }
 
-    public void printTree(List<String> header) {
-        for (Map.Entry<String, TreeNode> mapEntry : children.entrySet()) {
-            String nodeName = mapEntry.getKey();
-            TreeNode node = mapEntry.getValue();
+    public void printTree(TreeNode node, List<String> header, String headSpacing) {
+        String spacing = headSpacing;
+        String nodeName = header.get(node.getIndex());
+        System.out.println(spacing + nodeName);
+        spacing = spacing + "\t";
 
-            if (node.getChildren().isEmpty()) {
-                //this valueAttribute has no children and directly goes to a class.
-                System.out.println("\t" + mapEntry.getKey() + " - " + mapEntry.getValue().getTargetClass());
+        for (Map.Entry<String, TreeNode> nodeMapEntry : node.getChildren().entrySet()) {
+            if (nodeMapEntry.getValue().isLeaf()) {
+                String leafName = nodeMapEntry.getKey() + " - " + nodeMapEntry.getValue().getTargetClass();
+                System.out.println(spacing + leafName);
             } else {
-                System.out.println("\t" + nodeName);
-                System.out.println("\t\t" + header.get(node.getIndex()));
-            }
-
-            for (Map.Entry<String, TreeNode> nodeMapEntry : node.getChildren().entrySet()) {
-                if (nodeMapEntry.getValue().isLeaf()) {
-                    nodeName = nodeMapEntry.getKey() + " - " + nodeMapEntry.getValue().getTargetClass();
-                }
-                System.out.println("\t\t\t" + nodeName);
+                headSpacing = spacing;
+                printTree(nodeMapEntry.getValue(), header, headSpacing);
             }
         }
     }
-
 }

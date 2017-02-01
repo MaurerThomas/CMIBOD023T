@@ -9,11 +9,13 @@ import java.util.logging.Logger;
 
 public class DataReader {
     private static final long SEED = 919460196;
-    private static File file = new File("stars.csv");
+    private static File file;
     private Object[][] data;
     private List<String> header;
 
-    public DataReader() {
+    public DataReader(String fileName) {
+        file = new File(fileName);
+
         try {
             readData();
         } catch (IOException e) {

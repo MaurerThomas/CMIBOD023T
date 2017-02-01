@@ -16,7 +16,7 @@ public class Bayesian {
     private double priorProbabilityFirstClass = 0;
     private double priorProbabilitySecondClass = 0;
     private double priorProbabilityAll = 0;
-    private DataReader dataReader = new DataReader();
+    private DataReader dataReader = new DataReader("mushrooms.csv");
     private Map<Object, Map<Integer, Map<Object, Double>>> targetClassesWithConditionalProbabilities = new HashMap<>();
 
     private Bayesian() {

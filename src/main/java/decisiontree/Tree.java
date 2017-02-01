@@ -10,9 +10,8 @@ import static decisiontree.DecisionTreeAlgorithm.getTargetClass;
 
 public class Tree {
     private DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
-
     private TreeNode root = new TreeNode();
-    private DataReader dataReader = new DataReader();
+    private DataReader dataReader = new DataReader("mushrooms.csv");
 
     //    Begin
 
@@ -59,7 +58,7 @@ public class Tree {
         decisionTreeAlgorithm.init(trainingData, attributes);
 
         buildDecisionTree(root, trainingData, attributes);
-        root.printTree(dataReader.getHeader());
+        root.printTree(root, dataReader.getHeader(), "");
 
         for (int i = 1; i < dataset.length; i++) {
             Object indexedClass = classify(Arrays.asList(dataset[i]));

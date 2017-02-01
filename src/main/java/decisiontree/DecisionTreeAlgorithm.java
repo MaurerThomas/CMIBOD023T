@@ -64,15 +64,15 @@ class DecisionTreeAlgorithm {
 
     private void setValueAttributesForAttributes(Object[][] dataset, List<Attribute> attributes) {
         // Set all valueAttributes in valueAttributeMap
-        Map<Attribute, Map<String, ValueAttribute>> kaas = new HashMap<>();
+        Map<Attribute, Map<String, ValueAttribute>> attributsWithValueAttributes = new HashMap<>();
         for (Object[] row : dataset) {
             for (Attribute attribute : attributes) {
-                Map<String, ValueAttribute> valueAttributeMap = kaas.get(attribute);
+                Map<String, ValueAttribute> valueAttributeMap = attributsWithValueAttributes.get(attribute);
                 String valueAttributeName = row[attribute.getIndex()].toString();
 
                 if (valueAttributeMap == null) {
                     valueAttributeMap = new HashMap<>();
-                    kaas.put(attribute, valueAttributeMap);
+                    attributsWithValueAttributes.put(attribute, valueAttributeMap);
                 }
                 ValueAttribute valueAttribute = valueAttributeMap.get(valueAttributeName);
 

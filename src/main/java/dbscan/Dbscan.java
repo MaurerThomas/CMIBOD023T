@@ -53,7 +53,7 @@ public class Dbscan {
 
         startCluster();
         draw();
-        //clusters.forEach(Cluster::plotCluster);
+        clusters.forEach(Cluster::plotCluster);
     }
 
     private void startCluster() {
@@ -134,6 +134,7 @@ public class Dbscan {
     private Map<Cluster, Color> getColors() {
         Map<Cluster, Color> colorMap = new HashMap<>();
         colorMap.put(null, new Color(0, 0, 0));
+        // Use SEED to get same colors.
         Random random = new Random(SEED);
         for (Cluster cluster : clusters) {
             float r = random.nextFloat();

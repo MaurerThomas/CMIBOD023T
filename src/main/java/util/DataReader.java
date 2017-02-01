@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataReader {
-    private static final long SEED = 919460196;
+    private static final long SEED = 1;
     private static File file;
     private Object[][] data;
     private List<String> header;
@@ -61,6 +61,7 @@ public class DataReader {
     public Object[][] createTrainingDataSet() {
         int trainingDataSetSize = data.length / 3;
         Set<Object[]> subset = new HashSet<>(trainingDataSetSize);
+        //Random random = new Random(SEED);
         Random random = new Random();
 
         for (int i = 0; i < trainingDataSetSize; i++) {

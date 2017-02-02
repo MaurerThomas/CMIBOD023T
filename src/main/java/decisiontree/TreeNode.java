@@ -24,6 +24,7 @@ public class TreeNode extends Node {
             if (nodeMapEntry.getValue().isLeaf()) {
                 System.out.println(spacing + nodeMapEntry.getKey() + " - " + nodeMapEntry.getValue().getTargetClass());
             } else {
+                System.out.println(spacing + nodeMapEntry.getKey());
                 printTree(nodeMapEntry.getValue(), header, spacing);
             }
         }

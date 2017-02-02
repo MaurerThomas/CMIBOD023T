@@ -13,8 +13,7 @@ public class Tree {
     private final TreeNode root = new TreeNode();
     private final DataReader dataReader = new DataReader("mushrooms.csv");
 
-    //    Begin
-
+//    Begin
 //    Load learning sets first, create decision tree root
 //    node 'rootNode', add learning set S into root node
 //    as its subset.

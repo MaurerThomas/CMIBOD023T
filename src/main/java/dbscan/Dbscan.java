@@ -134,6 +134,7 @@ public class Dbscan {
 
     private Map<Cluster, Color> getColors() {
         Map<Cluster, Color> colorMap = new HashMap<>();
+        //Insert a black colored cluster by key null, these are the outliers because of no assignment to a cluster.
         colorMap.put(null, new Color(0, 0, 0));
         // Use SEED to get same colors.
         Random random = new Random(SEED);

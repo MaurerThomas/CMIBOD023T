@@ -58,7 +58,7 @@ public class Bayesian {
                 }
             }
 
-            // Append probability with the category in results.
+            // Append probability with the best category in results.
             if (prob > bestP) {
                 bestP = prob;
                 best = targetClassFeature;

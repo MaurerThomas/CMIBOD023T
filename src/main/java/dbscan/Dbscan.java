@@ -53,6 +53,7 @@ public class Dbscan {
 
         startCluster();
         draw();
+        System.out.println("Amount of Clusters: " + clusters.size() + "\n");
         clusters.forEach(Cluster::plotCluster);
     }
 

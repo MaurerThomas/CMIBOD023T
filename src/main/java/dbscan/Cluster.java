@@ -21,9 +21,9 @@ public class Cluster {
     }
 
     public void plotCluster() {
-        System.out.println("[Cluster: " + id + "]");
-        System.out.println("[Points:");
-        points.forEach(System.out::println);
-        System.out.println("]  \n");
+        System.out.println("Cluster: " + id + "\t-\t" + "Amount of Points: " + points.size());
+        //System.out.println("[Points:");
+        //points.forEach(System.out::println);
+        //System.out.println("]  \n");
     }
 }
